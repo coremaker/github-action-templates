@@ -1,0 +1,20 @@
+name: Reusable workflow testing
+
+on:
+  workflow_call:
+    inputs:
+      config-path:
+        required: true
+        type: string
+      test:
+        required: true
+        type: string
+
+jobs:
+  echo:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Echo input from caller
+        run: echo ${{ inputs.config-path }} from ${{ inputs.test }}
