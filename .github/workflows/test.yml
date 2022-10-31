@@ -2,6 +2,7 @@ name: Java17-Corretto
 
 on:
   workflow_call:
+    inputs:
       serviceName:
         required: true
         type: string
