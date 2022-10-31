@@ -25,7 +25,7 @@ jobs:
         uses: gradle/gradle-build-action@v2
       
       - name: Execute Gradle build
-        run: gradlew :${{ inputs.serviceName }}:build -x test
+        run: ./gradlew :${{ inputs.serviceName }}:build -x test
 
       - name: Done
         run: echo built succesfully!
