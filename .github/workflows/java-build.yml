@@ -8,8 +8,8 @@ on:
         type: string
       javaVersion:
         required: false
-        type: string
-        default: '17'
+        type: number
+        default: 17
       javaDistribution:
         required: false
         type: string
