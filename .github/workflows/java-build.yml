@@ -1,4 +1,4 @@
-name: Java17-Corretto
+name: Java
 
 on:
   workflow_call:
@@ -6,7 +6,14 @@ on:
       serviceName:
         required: true
         type: string
-
+      javaVersion:
+        required: false
+        type: number
+        default: '17'
+      javaDistribution:
+        required: false
+        type: string
+        default: 'corretto'
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -18,8 +25,8 @@ jobs:
       - name: Setup JAVA
         uses: actions/setup-java@v3
         with:
-          java-version: '17'
-          distribution: 'corretto'
+          java-version: ${{ inputs.javaVersion }}
+          distribution: ${{ inputs.javaDistribution }}
 
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2
@@ -28,6 +35,6 @@ jobs:
         run: ./gradlew :${{ inputs.serviceName }}:build -x test
 
       - name: Done
-        run: echo built succesfully!
+        run: echo build succesfully!
 
 
