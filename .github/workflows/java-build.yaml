@@ -15,9 +15,9 @@ on:
         type: string
         default: 'corretto'
       GCR_REGISTRY:
-        required: true
+        required: false
         type: string
-        default: 'eu.gcr.io'
+        default: 'gcr.io'
       GCR_REGISTRY_PROJECT:
         required: true
         type: string
@@ -32,13 +32,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Login to GCR
-        uses: docker/login-action@v2
-        with:
-          registry: ${{ inputs.GCR_REGISTRY }}
-          username: _json_key_base64
-          password: ${{ secrets.GCR_JSON_KEY }}
-
       - name: Setup JAVA
         uses: actions/setup-java@v3
         with:
@@ -51,6 +44,13 @@ jobs:
       - name: Execute Gradle build
         run: ./gradlew :${{ inputs.serviceName }}:build -x test
       
+      - name: Login to GCR
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ inputs.GCR_REGISTRY }}
+          username: _json_key
+          password: ${{ secrets.GCR_JSON_KEY }}
+
       - name: Build and push
         uses: docker/build-push-action@v3
         with:
