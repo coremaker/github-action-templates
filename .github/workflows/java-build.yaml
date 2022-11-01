@@ -52,7 +52,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           push: true
-          tags: ${{ inputs.GCR_REGISTRY }}/${{ inputs.SERVICE_NAME }}:${{ GITHUB_SHA }}
+          tags: ${{ inputs.GCR_REGISTRY }}/${{ inputs.SERVICE_NAME }}:${{ github.sha }}
 
       - name: Done
         run: echo build succesfully!
