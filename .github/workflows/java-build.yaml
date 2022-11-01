@@ -18,6 +18,9 @@ on:
         required: true
         type: string
         default: 'eu.gcr.io'
+      GCR_REGISTRY_PROJECT:
+        required: true
+        type: string
     secrets:
       GCR_JSON_KEY:
         required: true
@@ -52,7 +55,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           push: true
-          tags: ${{ inputs.GCR_REGISTRY }}/${{ inputs.SERVICE_NAME }}:${{ github.sha }}
+          tags: ${{ inputs.GCR_REGISTRY }}/${{ inputs.GCR_REGISTRY_PROJECT }}/${{ inputs.SERVICE_NAME }}:${{ github.sha }}
 
       - name: Done
         run: echo build succesfully!
