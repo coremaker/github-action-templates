@@ -54,6 +54,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v3
         with:
+          context: ${{ inputs.serviceName }}
           push: true
           tags: ${{ inputs.GCR_REGISTRY }}/${{ inputs.GCR_REGISTRY_PROJECT }}/${{ inputs.serviceName }}:${{ github.sha }}
 
