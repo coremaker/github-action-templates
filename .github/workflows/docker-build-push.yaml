@@ -1,0 +1,18 @@
+name: Docker Build and Push
+
+on:
+  workflow_call:
+    inputs:
+      serviceName:
+        required: true
+        type: string
+
+jobs:
+  build-push-docker:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Build dockerfile
+        run: echo Docker image built and pushed
