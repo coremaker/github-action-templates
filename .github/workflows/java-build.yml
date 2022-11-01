@@ -9,7 +9,7 @@ on:
       javaVersion:
         required: false
         type: number
-        default: '17'
+        default: 17
       javaDistribution:
         required: false
         type: string
