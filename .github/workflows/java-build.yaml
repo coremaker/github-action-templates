@@ -3,14 +3,14 @@ name: Java
 on:
   workflow_call:
     inputs:
-      serviceName:
+      SERVICE_NAME:
         required: true
         type: string
-      javaVersion:
+      JAVA_VERSION:
         required: false
         type: number
         default: 17
-      javaDistribution:
+      JAVA_DISTRIBUTION:
         required: false
         type: string
         default: 'corretto'
@@ -35,14 +35,14 @@ jobs:
       - name: Setup JAVA
         uses: actions/setup-java@v3
         with:
-          java-version: ${{ inputs.javaVersion }}
-          distribution: ${{ inputs.javaDistribution }}
+          java-version: ${{ inputs.JAVA_VERSION }}
+          distribution: ${{ inputs.JAVA_DISTRIBUTION }}
 
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2
       
       - name: Execute Gradle build
-        run: ./gradlew :${{ inputs.serviceName }}:build -x test
+        run: ./gradlew :${{ inputs.SERVICE_NAME }}:build
       
       - name: Login to GCR
         uses: docker/login-action@v2
@@ -54,9 +54,9 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v3
         with:
-          context: ${{ inputs.serviceName }}
+          context: ${{ inputs.SERVICE_NAME }}
           push: true
-          tags: ${{ inputs.GCR_REGISTRY }}/${{ inputs.GCR_REGISTRY_PROJECT }}/${{ inputs.serviceName }}:${{ github.sha }}
+          tags: ${{ inputs.GCR_REGISTRY }}/${{ inputs.GCR_REGISTRY_PROJECT }}/${{ inputs.SERVICE_NAME }}:${{ github.sha }}
 
       - name: Done
         run: echo build succesfully!
