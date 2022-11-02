@@ -8,7 +8,7 @@ on:
         type: string
       RUN_TESTS:
         required: false
-        type: bool
+        type: boolean
         default: false
       JAVA_VERSION:
         required: false
