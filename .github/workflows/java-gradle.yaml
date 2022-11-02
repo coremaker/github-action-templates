@@ -1,4 +1,4 @@
-name: Java
+name: Java-Gradle
 
 on:
   workflow_call:
@@ -6,6 +6,10 @@ on:
       SERVICE_NAME:
         required: true
         type: string
+      RUN_TESTS:
+        required: false
+        type: bool
+        default: false
       JAVA_VERSION:
         required: false
         type: number
@@ -41,6 +45,10 @@ jobs:
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2
       
+      - name: Running Tests
+        if: ${{ inputs.RUN_TESTS }}
+        run: ./gradlew :${{ inputs.SERVICE_NAME }}:test
+
       - name: Execute Gradle build
         run: ./gradlew :${{ inputs.SERVICE_NAME }}:build
       
