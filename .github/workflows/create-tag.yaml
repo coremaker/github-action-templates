@@ -6,6 +6,9 @@ on:
       SERVICE_NAME:
         required: true
         type: string
+      TAG:
+        required: true
+        type: string
 
 jobs:
   create-tag:
@@ -14,4 +17,4 @@ jobs:
       - uses: actions/checkout@v3
       - uses: rickstaa/action-create-tag@v1
         with:
-          tag: ${{ inputs.SERVICE_NAME }}-tag-${{ github.sha }}
+          tag: ${{ inputs.TAG }}
