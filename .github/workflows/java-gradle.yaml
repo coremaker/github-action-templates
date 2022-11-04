@@ -65,7 +65,7 @@ jobs:
           context: ${{ inputs.SERVICE_NAME }}
           push: true
           tags: ${{ inputs.GCR_REGISTRY }}/${{ inputs.GCR_REGISTRY_PROJECT }}/${{ inputs.SERVICE_NAME }}:latest,${{ inputs.GCR_REGISTRY }}/${{ inputs.GCR_REGISTRY_PROJECT }}/${{ inputs.SERVICE_NAME }}:${{ github.sha }}
-          build-args: |
+          labels: |
             COMMIT_SHA=${{ github.sha }}
 
       - name: Done
