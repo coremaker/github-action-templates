@@ -13,10 +13,15 @@ on:
       GCR_REGISTRY_PROJECT:
         required: true
         type: string
+      MONOREPO:
+        required: false
+        type: boolean
+        default: false
     secrets:
       GCR_JSON_KEY:
         required: true
-        type: string
+      GH_PAT:
+        required: false
 
 jobs:
   build-push-docker:
@@ -25,8 +30,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Build dockerfile
-        run: echo Docker image built and pushed
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
 
       - name: Login to GCR
         uses: docker/login-action@v2
@@ -36,10 +44,24 @@ jobs:
           password: ${{ secrets.GCR_JSON_KEY }}
 
       - name: Build and push
+        if: ${{ inputs.MONOREPO }}
         uses: docker/build-push-action@v3
         with:
           context: ${{ inputs.SERVICE_NAME }}
           push: true
           tags: ${{ inputs.GCR_REGISTRY }}/${{ inputs.GCR_REGISTRY_PROJECT }}/${{ inputs.SERVICE_NAME }}:latest,${{ inputs.GCR_REGISTRY }}/${{ inputs.GCR_REGISTRY_PROJECT }}/${{ inputs.SERVICE_NAME }}:${{ github.sha }}
+          labels: |
+            COMMIT_SHA=${{ github.sha }}
+
+      - name: Build and push
+        if: ${{ ! inputs.MONOREPO }}
+        uses: docker/build-push-action@v3
+        with:
+          push: true
+          build-args: |
+            GITHUB_PAT=${{ secrets.GH_PAT }}
+          tags: ${{ inputs.GCR_REGISTRY }}/${{ inputs.GCR_REGISTRY_PROJECT }}/${{ inputs.SERVICE_NAME }}:latest,${{ inputs.GCR_REGISTRY }}/${{ inputs.GCR_REGISTRY_PROJECT }}/${{ inputs.SERVICE_NAME }}:${{ github.sha }}
+          cache-from: type=registry,ref=${{ inputs.GCR_REGISTRY }}/${{ inputs.GCR_REGISTRY_PROJECT }}/${{ inputs.SERVICE_NAME }}:buildcache
+          cache-to: type=registry,ref=${{ inputs.GCR_REGISTRY }}/${{ inputs.GCR_REGISTRY_PROJECT }}/${{ inputs.SERVICE_NAME }}:buildcache,mode=max
           labels: |
             COMMIT_SHA=${{ github.sha }}
