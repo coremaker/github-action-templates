@@ -1,0 +1,42 @@
+name: Node Kustomize checker
+
+on:
+  - pull_request
+jobs:
+  kustomize:
+    name: 'Kustomize checks'
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout'
+        uses: actions/checkout@master
+
+    # Kustomize template to use kustomize build command on directories that contain kustomization.yaml
+    # Kustomize build on base/ directory
+      - name: 'Kustomize Build base/'
+        uses: karancode/kustomize-github-action@v1.3.0
+        with:
+          kustomize_version: '5.0.0'
+          kustomize_build_dir: 'base'  
+          kustomize_comment: false
+          kustomize_build_options: "--load-restrictor=LoadRestrictionsNone --reorder=legacy"
+          enable_alpha_plugins: false
+    
+    # Kustomize build on qa environment
+      - name: 'Kustomize Build QA/'
+        uses: karancode/kustomize-github-action@v1.3.0
+        with:
+          kustomize_version: '5.0.0'
+          kustomize_build_dir: 'environments/qa'
+          kustomize_comment: false
+          kustomize_build_options: "--load-restrictor=LoadRestrictionsNone --reorder=legacy"
+          enable_alpha_plugins: false
+      
+    # Kustomize build on prod environment  
+      - name: 'Kustomize Build PROD/'
+        uses: karancode/kustomize-github-action@v1.3.0
+        with:
+          kustomize_version: '5.0.0'
+          kustomize_build_dir: 'environments/prod'
+          kustomize_comment: false
+          kustomize_build_options: "--load-restrictor=LoadRestrictionsNone --reorder=legacy"
+          enable_alpha_plugins: false
