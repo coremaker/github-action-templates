@@ -1,7 +1,15 @@
 name: Node Kustomize checker
 
 on:
-  - pull_request
+  workflow_call:
+    inputs:
+      BASE_DIRECTORY:
+        required: true
+        type: string
+      ENV_DIRECTORY:
+        required: true
+        type: string
+
 jobs:
   kustomize:
     name: 'Kustomize checks'
@@ -16,9 +24,8 @@ jobs:
         uses: karancode/kustomize-github-action@v1.3.0
         with:
           kustomize_version: '5.0.0'
-          kustomize_build_dir: 'base'  
+          kustomize_build_dir: ${{ inputs.BASE_DIRECTORY }}
           kustomize_comment: false
-          kustomize_build_options: "--load-restrictor=LoadRestrictionsNone --reorder=legacy"
           enable_alpha_plugins: false
     
     # Kustomize build on qa environment
@@ -26,9 +33,8 @@ jobs:
         uses: karancode/kustomize-github-action@v1.3.0
         with:
           kustomize_version: '5.0.0'
-          kustomize_build_dir: 'environments/qa'
+          kustomize_build_dir: ${{ inputs.ENV_DIRECTORY }}
           kustomize_comment: false
-          kustomize_build_options: "--load-restrictor=LoadRestrictionsNone --reorder=legacy"
           enable_alpha_plugins: false
       
     # Kustomize build on prod environment  
@@ -38,5 +44,4 @@ jobs:
           kustomize_version: '5.0.0'
           kustomize_build_dir: 'environments/prod'
           kustomize_comment: false
-          kustomize_build_options: "--load-restrictor=LoadRestrictionsNone --reorder=legacy"
           enable_alpha_plugins: false
