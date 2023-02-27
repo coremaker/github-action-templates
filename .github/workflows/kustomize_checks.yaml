@@ -3,14 +3,8 @@ name: Node Kustomize checker
 on:
   workflow_call:
     inputs:
-      BASE_DIRECTORY:
-        required: true
-        type: string
       ENV_DIRECTORY:
         required: true
-        type: string
-      ENV_DIRECTORY2:
-        required: false
         type: string
 
 jobs:
@@ -22,29 +16,11 @@ jobs:
         uses: actions/checkout@master
 
     # Kustomize template to use kustomize build command on directories that contain kustomization.yaml
-    # Kustomize build on base/ directory
       - name: 'Kustomize Build base/'
-        uses: karancode/kustomize-github-action@v1.3.0
-        with:
-          kustomize_version: '5.0.0'
-          kustomize_build_dir: ${{ inputs.BASE_DIRECTORY }}
-          kustomize_comment: false
-          enable_alpha_plugins: false
-    
-    # Kustomize build on qa environment
-      - name: 'Kustomize Build QA/'
         uses: karancode/kustomize-github-action@v1.3.0
         with:
           kustomize_version: '5.0.0'
           kustomize_build_dir: ${{ inputs.ENV_DIRECTORY }}
           kustomize_comment: false
           enable_alpha_plugins: false
-      
-    # Kustomize build on prod environment  
-      - name: 'Kustomize Build PROD/'
-        uses: karancode/kustomize-github-action@v1.3.0
-        with:
-          kustomize_version: '5.0.0'
-          kustomize_build_dir: ${{ inputs.ENV_DIRECTORY2 }}
-          kustomize_comment: false
-          enable_alpha_plugins: false
+    
