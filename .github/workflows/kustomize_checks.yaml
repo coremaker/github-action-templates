@@ -9,7 +9,7 @@ on:
 
 jobs:
   kustomize:
-    name: 'Kustomize checks'
+    name: 'Kustomize checks for ${{ inputs.ENV_DIRECTORY }}'
     runs-on: ubuntu-latest
     steps:
       - name: 'Checkout'
