@@ -1,26 +1,39 @@
-name: Node Kustomize checker
+name: Kustomize checker
 
 on:
   workflow_call:
     inputs:
-      ENV_DIRECTORY:
+      KUSTOMIZE_DIR:
         required: true
+        type: string
+      KUSTOMIZE_VERSION:
+        required: true
+        type: string
+      KUSTOMIZE_BUILD_OPTIONS:
+        required: false
+        type: string
+      KUSTOMIZE_COMMENT:
+        required: false
+        type: string
+      ENABLE_ALPHA_PLUGINS:
+        required: false
         type: string
 
 jobs:
   kustomize:
-    name: 'Kustomize checks for ${{ inputs.ENV_DIRECTORY }}'
+    name: 'Kustomize checks for ${{ inputs.KUSTOMIZE_DIR }}'
     runs-on: ubuntu-latest
     steps:
       - name: 'Checkout'
         uses: actions/checkout@master
 
     # Kustomize template to use kustomize build command on directories that contain kustomization.yaml
-      - name: 'Kustomize Build base/'
+      - name: 'Kustomize Build ${{ inputs.KUSTOMIZE_DIR }}'
         uses: karancode/kustomize-github-action@v1.3.0
         with:
-          kustomize_version: '5.0.0'
-          kustomize_build_dir: ${{ inputs.ENV_DIRECTORY }}
-          kustomize_comment: false
-          enable_alpha_plugins: false
+          kustomize_version: ${{ inputs.KUSTOMIZE_VERSION }}
+          kustomize_build_dir: ${{ inputs.KUSTOMIZE_DIR }}
+          kustomize_build_options: ${{ inputs.KUSTOMIZE_BUILD_OPTIONS }}
+          kustomize_comment: ${{ inputs.KUSTOMIZE_COMMENT }}
+          enable_alpha_plugins: ${{ inputs.ENABLE_ALPHA_PLUGINS }}
     
