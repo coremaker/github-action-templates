@@ -1,0 +1,15 @@
+# Intellij
+.idea/
+*.iml
+*.iws
+*.ipr
+*.ids
+*.orig
+
+# Visual Code
+.DS_Store
+
+# Others
+*.json
+local
+.local
