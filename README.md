@@ -8,3 +8,4 @@
 * [docker-build-push](.github/workflows/docker-build-push.yaml)
 * [java-gradle](.github/workflows/java-gradle.yaml)
 * [kustomize-checks](.github/workflows/kustomize-checks.yaml)
+* [nodejs](.github/workflows/nodejs.yaml)
