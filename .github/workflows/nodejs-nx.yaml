@@ -76,7 +76,7 @@ jobs:
         if: ${{ inputs.RUN_TESTS }}
         run: npm run test
 
-      - name: Check if ${{ inputs.SERVICE_NAME }} is affected
+      - name: Nx check
         id: apps
         run: |
               output="$(npm run affected:app 2>&1)"
