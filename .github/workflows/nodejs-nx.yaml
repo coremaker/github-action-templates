@@ -7,6 +7,9 @@ on:
         required: false
         type: string
         default: "."
+      DOCKER_DIR:
+        required: true
+        type: string
       SERVICE_NAME:
         required: true
         type: string
@@ -49,7 +52,9 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
 
       - name: Set up NX    
         uses: nrwl/nx-set-shas@v3
@@ -81,15 +86,15 @@ jobs:
         run: |
               output="$(npm run affected:app 2>&1)"
               echo "Found: $output"
-              echo "Grepping for \${{ inputs.SERVICE_NAME }}"
-              echo "$output" | grep -q \${{ inputs.SERVICE_NAME }} || echo "::notice::Not Found" && echo "RUN='false'" >> $GITHUB_OUTPUT && exit 0
+              echo "Grepping for ${{ inputs.SERVICE_NAME }}"
+              echo "$output" | grep ${{ inputs.SERVICE_NAME }} || echo "::notice::Not Found" && echo "RUN='false'" >> $GITHUB_OUTPUT && exit 0
 
       - name: Build app ${{ inputs.SERVICE_NAME }}
-        if: steps.apps.outputs.RUN == 'true'
-        run: npm run build
+        if: ${{ steps.apps.outputs.RUN != 'false' }}
+        run: npm run build:${{ inputs.SERVICE_NAME }}
 
       - name: Login to GCR
-        if: inputs.PR_CHECK == 'false' && steps.apps.outputs.RUN == 'true'
+        if: ${{ inputs.PR_CHECK == false && steps.apps.outputs.RUN != 'false'}}
         uses: docker/login-action@v2
         with:
           registry: ${{ inputs.GCR_REGISTRY }}
@@ -97,17 +102,17 @@ jobs:
           password: ${{ secrets.GCR_JSON_KEY }}
 
       - name: Build Docker Image
-        if: steps.apps.outputs.RUN == 'true'
+        if: ${{ steps.apps.outputs.RUN != 'false' }}
         uses: docker/build-push-action@v3
         with:
-          context: ${{ inputs.WORKING_DIR }}
+          context: ${{ inputs.DOCKER_DIR }}
           push: false
           tags: ${{ inputs.GCR_REGISTRY }}/${{ inputs.GCR_REGISTRY_PROJECT }}/${{ inputs.SERVICE_NAME }}:latest,${{ inputs.GCR_REGISTRY }}/${{ inputs.GCR_REGISTRY_PROJECT }}/${{ inputs.SERVICE_NAME }}:${{ github.sha }}
           labels: |
             COMMIT_SHA=${{ github.sha }}
 
       - name: Trivy vulnerability scanner
-        if: inputs.TRIVY_SCAN_ENABLED && steps.apps.outputs.RUN == 'true'
+        if: ${{ inputs.TRIVY_SCAN_ENABLED && steps.apps.outputs.RUN != 'false' }}
         uses: aquasecurity/trivy-action@0.9.1
         with:
           image-ref: ${{ inputs.GCR_REGISTRY }}/${{ inputs.GCR_REGISTRY_PROJECT }}/${{ inputs.SERVICE_NAME }}:${{ github.sha }}
@@ -119,10 +124,10 @@ jobs:
           timeout: ${{ inputs.TRIVY_TIMEOUT }}
 
       - name: Push Docker Image
-        if: inputs.PR_CHECK == 'false' && steps.apps.outputs.RUN == 'true'
+        if: ${{ inputs.PR_CHECK == false && steps.apps.outputs.RUN != 'false' }}
         uses: docker/build-push-action@v3
         with:
-          context: ${{ inputs.WORKING_DIR }}
+          context: ${{ inputs.DOCKER_DIR }}
           push: true
           tags: ${{ inputs.GCR_REGISTRY }}/${{ inputs.GCR_REGISTRY_PROJECT }}/${{ inputs.SERVICE_NAME }}:latest,${{ inputs.GCR_REGISTRY }}/${{ inputs.GCR_REGISTRY_PROJECT }}/${{ inputs.SERVICE_NAME }}:${{ github.sha }}
           labels: |
