@@ -84,7 +84,7 @@ jobs:
               output="$(npm run affected:app 2>&1)"
               echo "Found: $output"
               echo "Grepping for ${{ inputs.SERVICE_NAME }}"
-              echo "$output" | grep -q ${{ inputs.SERVICE_NAME }} || echo "::notice::Not Found" && echo "RUN='false'" >> $GITHUB_OUTPUT && exit 0
+              echo "$output" | grep ${{ inputs.SERVICE_NAME }} || echo "::notice::Not Found" && echo "RUN='false'" >> $GITHUB_OUTPUT && exit 0
 
       - name: Build app ${{ inputs.SERVICE_NAME }}
         if: steps.apps.outputs.RUN == 'true'
