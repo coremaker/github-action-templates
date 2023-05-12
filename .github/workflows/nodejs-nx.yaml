@@ -7,6 +7,9 @@ on:
         required: false
         type: string
         default: "."
+      DOCKER_DIR:
+        required: true
+        type: string
       SERVICE_NAME:
         required: true
         type: string
@@ -102,7 +105,7 @@ jobs:
         if: ${{ steps.apps.outputs.RUN != 'false' }}
         uses: docker/build-push-action@v3
         with:
-          context: ${{ inputs.WORKING_DIR }}
+          context: ${{ inputs.DOCKER_DIR }}
           push: false
           tags: ${{ inputs.GCR_REGISTRY }}/${{ inputs.GCR_REGISTRY_PROJECT }}/${{ inputs.SERVICE_NAME }}:latest,${{ inputs.GCR_REGISTRY }}/${{ inputs.GCR_REGISTRY_PROJECT }}/${{ inputs.SERVICE_NAME }}:${{ github.sha }}
           labels: |
@@ -124,7 +127,7 @@ jobs:
         if: ${{ inputs.PR_CHECK == false && steps.apps.outputs.RUN != 'false' }}
         uses: docker/build-push-action@v3
         with:
-          context: ${{ inputs.WORKING_DIR }}
+          context: ${{ inputs.DOCKER_DIR }}
           push: true
           tags: ${{ inputs.GCR_REGISTRY }}/${{ inputs.GCR_REGISTRY_PROJECT }}/${{ inputs.SERVICE_NAME }}:latest,${{ inputs.GCR_REGISTRY }}/${{ inputs.GCR_REGISTRY_PROJECT }}/${{ inputs.SERVICE_NAME }}:${{ github.sha }}
           labels: |
