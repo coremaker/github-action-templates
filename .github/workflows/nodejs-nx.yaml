@@ -1,0 +1,129 @@
+name: Nodejs-nx
+
+on:
+  workflow_call:
+    inputs:
+      WORKING_DIR:
+        required: false
+        type: string
+        default: "."
+      SERVICE_NAME:
+        required: true
+        type: string
+      RUN_TESTS:
+        required: false
+        type: boolean
+        default: false
+      NODE_VERSION:
+        required: false
+        type: number
+        default: 16
+      GCR_REGISTRY:
+        required: false
+        type: string
+        default: "gcr.io"
+      GCR_REGISTRY_PROJECT:
+        required: true
+        type: string
+      TRIVY_SCAN_ENABLED:
+        required: false
+        type: boolean
+        default: true
+      TRIVY_TIMEOUT:
+        required: false
+        type: string
+        default: "10m0s"
+      PR_CHECK:
+        required: false 
+        type: boolean
+        default: false
+    secrets:
+      GCR_JSON_KEY:
+        required: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ inputs.WORKING_DIR }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up NX    
+        uses: nrwl/nx-set-shas@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ inputs.NODE_VERSION }}
+
+      - name: Cache dependencies
+        id: cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ inputs.WORKING_DIR }}/node_modules
+          key: deps-node-modules-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+              npm ci
+              npm install @nrwl/nx-linux-x64-gnu
+
+      - name: Running Tests
+        if: ${{ inputs.RUN_TESTS }}
+        run: npm run test
+
+      - name: Nx check
+        id: apps
+        run: |
+              output="$(npm run affected:app 2>&1)"
+              echo "Found: $output"
+              echo "Grepping for \${{ inputs.SERVICE_NAME }}"
+              echo "$output" | grep -q \${{ inputs.SERVICE_NAME }} || echo "::notice::Not Found" && echo "RUN='false'" >> $GITHUB_OUTPUT && exit 0
+
+      - name: Build app ${{ inputs.SERVICE_NAME }}
+        if: steps.apps.outputs.RUN == 'true'
+        run: npm run build
+
+      - name: Login to GCR
+        if: inputs.PR_CHECK == 'false' && steps.apps.outputs.RUN == 'true'
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ inputs.GCR_REGISTRY }}
+          username: _json_key
+          password: ${{ secrets.GCR_JSON_KEY }}
+
+      - name: Build Docker Image
+        if: steps.apps.outputs.RUN == 'true'
+        uses: docker/build-push-action@v3
+        with:
+          context: ${{ inputs.WORKING_DIR }}
+          push: false
+          tags: ${{ inputs.GCR_REGISTRY }}/${{ inputs.GCR_REGISTRY_PROJECT }}/${{ inputs.SERVICE_NAME }}:latest,${{ inputs.GCR_REGISTRY }}/${{ inputs.GCR_REGISTRY_PROJECT }}/${{ inputs.SERVICE_NAME }}:${{ github.sha }}
+          labels: |
+            COMMIT_SHA=${{ github.sha }}
+
+      - name: Trivy vulnerability scanner
+        if: inputs.TRIVY_SCAN_ENABLED && steps.apps.outputs.RUN == 'true'
+        uses: aquasecurity/trivy-action@0.9.1
+        with:
+          image-ref: ${{ inputs.GCR_REGISTRY }}/${{ inputs.GCR_REGISTRY_PROJECT }}/${{ inputs.SERVICE_NAME }}:${{ github.sha }}
+          format: "table"
+          exit-code: 1
+          security-checks: "vuln"
+          vuln-type: "library"
+          severity: "CRITICAL"
+          timeout: ${{ inputs.TRIVY_TIMEOUT }}
+
+      - name: Push Docker Image
+        if: inputs.PR_CHECK == 'false' && steps.apps.outputs.RUN == 'true'
+        uses: docker/build-push-action@v3
+        with:
+          context: ${{ inputs.WORKING_DIR }}
+          push: true
+          tags: ${{ inputs.GCR_REGISTRY }}/${{ inputs.GCR_REGISTRY_PROJECT }}/${{ inputs.SERVICE_NAME }}:latest,${{ inputs.GCR_REGISTRY }}/${{ inputs.GCR_REGISTRY_PROJECT }}/${{ inputs.SERVICE_NAME }}:${{ github.sha }}
+          labels: |
+            COMMIT_SHA=${{ github.sha }}
