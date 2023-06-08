@@ -77,10 +77,6 @@ jobs:
               npm ci
               npm install @nrwl/nx-linux-x64-gnu
 
-      - name: Running Tests
-        if: ${{ inputs.RUN_TESTS }}
-        run: npm run test
-
       - name: Nx check
         id: apps
         run: |
@@ -89,8 +85,20 @@ jobs:
               echo "Grepping for ${{ inputs.SERVICE_NAME }}"
               echo "$output" | grep ${{ inputs.SERVICE_NAME }} || echo "::notice::Not Found" && echo "RUN=false" >> $GITHUB_OUTPUT && exit 0
 
-      - name: Build app ${{ inputs.SERVICE_NAME }}
+      - name: Running Tests
+        if: ${{ inputs.RUN_TESTS && steps.apps.outputs.RUN != 'false' }}
+        run: npm run test:affected
+            
+      - name: Running Lint
         if: ${{ steps.apps.outputs.RUN != 'false' }}
+        run: npm run lint:affected
+
+      - name: Running Codegen:check
+        if: ${{ steps.apps.outputs.RUN != 'false' }}
+        run: npm run codegen:check
+
+      - name: Build app ${{ inputs.SERVICE_NAME }}
+        if: ${{ steps.apps.outputs.RUN != 'false' && inputs.SERVICE_NAME != 'user-mobile-app' }}
         run: npm run build:${{ inputs.SERVICE_NAME }}
 
       - name: Login to GCR

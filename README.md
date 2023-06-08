@@ -9,3 +9,4 @@
 * [java-gradle](.github/workflows/java-gradle.yaml)
 * [kustomize-checks](.github/workflows/kustomize-checks.yaml)
 * [nodejs](.github/workflows/nodejs.yaml)
+* [nodejs-nx](.github/workflows/nodejs-nx.yaml)
