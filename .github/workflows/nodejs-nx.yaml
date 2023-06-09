@@ -83,7 +83,7 @@ jobs:
               output="$(npm run affected:app 2>&1)"
               echo "Found: $output"
               echo "Grepping for ${{ inputs.SERVICE_NAME }}"
-              echo "$output" | grep ${{ inputs.SERVICE_NAME }} || echo "::notice::Not Found" && echo "RUN=false" >> $GITHUB_OUTPUT && exit 0
+              echo "$output" | grep ${{ inputs.SERVICE_NAME }} || (echo "::notice::Not Found" && echo "RUN=false" >> $GITHUB_OUTPUT)
 
       - name: Running Tests
         if: ${{ inputs.RUN_TESTS && steps.apps.outputs.RUN != 'false' }}
@@ -110,7 +110,7 @@ jobs:
           password: ${{ secrets.GCR_JSON_KEY }}
 
       - name: Build Docker Image
-        if: ${{ steps.apps.outputs.RUN != 'false' }}
+        if: ${{ steps.apps.outputs.RUN != 'false' && inputs.SERVICE_NAME != 'user-mobile-app' }}
         uses: docker/build-push-action@v3
         with:
           context: ${{ inputs.DOCKER_DIR }}
