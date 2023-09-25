@@ -63,11 +63,11 @@ jobs:
       
       - name: Execute Build and Tests
         if: ${{ inputs.RUN_TESTS }}
-        run: ${{ inputs.WORKING_DIR }}/gradlew :${{ inputs.SERVICE_NAME }}:build
+        run: ${{ inputs.WORKING_DIR }}/./gradlew :${{ inputs.SERVICE_NAME }}:build
 
       - name: Execute Only Build (-x test)
         if: ${{ inputs.RUN_TESTS == false }}
-        run: ${{ inputs.WORKING_DIR }}/gradlew :${{ inputs.SERVICE_NAME }}:build -x test
+        run: ${{ inputs.WORKING_DIR }}/./gradlew :${{ inputs.SERVICE_NAME }}:build -x test
       
       - name: Login to GCR
         if: ${{ inputs.PR_CHECK == false }}
