@@ -43,6 +43,11 @@ on:
     secrets:
       GCR_JSON_KEY:
         required: true
+      GRAPHQL_HIVE_CDN_KEY:
+        required: false
+      GRAPHQL_HIVE_CDN_URL:
+        required: false
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -96,6 +101,9 @@ jobs:
       - name: Running Codegen:check
         if: ${{ steps.apps.outputs.RUN != 'false' }}
         run: npm run codegen:check
+        env:
+          GRAPHQL_HIVE_CDN_KEY: ${{ secrets.GRAPHQL_HIVE_CDN_KEY }}
+          GRAPHQL_HIVE_CDN_URL: ${{ secrets.GRAPHQL_HIVE_CDN_URL }}
 
       - name: Build app ${{ inputs.SERVICE_NAME }}
         if: ${{ steps.apps.outputs.RUN != 'false' && inputs.SERVICE_NAME != 'user-mobile-app' }}
