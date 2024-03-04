@@ -40,6 +40,10 @@ on:
         required: false 
         type: boolean
         default: false
+      GRAPHQL_HIVE_VARS:
+        required: false 
+        type: boolean
+        default: false
     secrets:
       GCR_JSON_KEY:
         required: true
@@ -99,7 +103,11 @@ jobs:
         run: npm run lint:affected
 
       - name: Running Codegen:check
-        if: ${{ steps.apps.outputs.RUN != 'false' }}
+        if: ${{ steps.apps.outputs.RUN != 'false' && inputs.GRAPHQL_HIVE_VARS != 'true' }}
+        run: npm run codegen:check
+
+      - name: Running Codegen:check
+        if: ${{ steps.apps.outputs.RUN != 'false' && inputs.GRAPHQL_HIVE_VARS == 'true' }}
         run: npm run codegen:check
         env:
           GRAPHQL_HIVE_CDN_KEY: ${{ secrets.GRAPHQL_HIVE_CDN_KEY }}
