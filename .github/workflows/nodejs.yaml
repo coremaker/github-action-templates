@@ -83,7 +83,9 @@ jobs:
 
       - name: Schema Check
         if: ${{ inputs.SCHEMA_CHECK }}
-        run: npm run schema:check --hive-token=${{ secrets.HIVE_TOKEN }}
+        run: npm run schema:check
+        env:
+          HIVE_TOKEN: ${{ secrets.HIVE_TOKEN }}
 
       - name: Login to GCR
         if: ${{ inputs.PR_CHECK == false }}
