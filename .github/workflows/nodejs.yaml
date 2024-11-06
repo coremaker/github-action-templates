@@ -74,10 +74,15 @@ jobs:
           key: deps-node-modules-${{ hashFiles('**/package-lock.json') }}
 
       - name: Install Protoc
+        id: install-protoc
         if: ${{ inputs.ENABLE_PROTOC }}
         uses: arduino/setup-protoc@v3
         with:
           version: "23.x"
+
+      - name: Add protoc PATH
+        if: ${{ inputs.ENABLE_PROTOC }}
+        run: echo ${{ steps.install-protoc.outputs.path }} >> $GITHUB_PATH
 
       - name: Install dependencies
         if: steps.cache.outputs.cache-hit != 'true'
