@@ -80,10 +80,6 @@ jobs:
         with:
           version: "23.x"
 
-      - name: Add protoc PATH
-        if: ${{ inputs.ENABLE_PROTOC }}
-        run: echo ${{ steps.install-protoc.outputs.path }}/bin/protoc >> $GITHUB_PATH
-
       - name: Install dependencies
         if: steps.cache.outputs.cache-hit != 'true'
         run: npm ci
