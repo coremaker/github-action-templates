@@ -16,7 +16,6 @@ on:
     secrets:
       GCR_JSON_KEY:
         required: true
-        type: string
 
 jobs:
   build-push-docker:
