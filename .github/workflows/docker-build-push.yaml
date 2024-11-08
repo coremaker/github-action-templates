@@ -6,6 +6,10 @@ on:
       SERVICE_NAME:
         required: true
         type: string
+      WORKING_DIR:
+        required: false
+        type: string
+        default: "."
       GCR_REGISTRY:
         required: false
         type: string
@@ -13,6 +17,10 @@ on:
       GCR_REGISTRY_PROJECT:
         required: true
         type: string
+      PR_CHECK:
+        required: false 
+        type: boolean
+        default: false
     secrets:
       GCR_JSON_KEY:
         required: true
@@ -22,23 +30,35 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
-
-      - name: Build dockerfile
-        run: echo Docker image built and pushed
+      - name: Checkout
+        uses: actions/checkout@v3
 
       - name: Login to GCR
+        if: ${{ inputs.PR_CHECK == false }}
         uses: docker/login-action@v2
         with:
           registry: ${{ inputs.GCR_REGISTRY }}
           username: _json_key
           password: ${{ secrets.GCR_JSON_KEY }}
 
-      - name: Build and push
+      - name: Build Docker Image
         uses: docker/build-push-action@v3
         with:
-          context: ${{ inputs.SERVICE_NAME }}
+          context: ${{ inputs.WORKING_DIR }}
+          push: false
+          tags: ${{ inputs.GCR_REGISTRY }}/${{ inputs.GCR_REGISTRY_PROJECT }}/${{ inputs.SERVICE_NAME }}:latest,${{ inputs.GCR_REGISTRY }}/${{ inputs.GCR_REGISTRY_PROJECT }}/${{ inputs.SERVICE_NAME }}:${{ github.sha }}
+          labels: |
+            COMMIT_SHA=${{ github.sha }}
+
+      - name: Push Docker Image
+        if: ${{ inputs.PR_CHECK == false }}
+        uses: docker/build-push-action@v3
+        with:
+          context: ${{ inputs.WORKING_DIR }}
           push: true
           tags: ${{ inputs.GCR_REGISTRY }}/${{ inputs.GCR_REGISTRY_PROJECT }}/${{ inputs.SERVICE_NAME }}:latest,${{ inputs.GCR_REGISTRY }}/${{ inputs.GCR_REGISTRY_PROJECT }}/${{ inputs.SERVICE_NAME }}:${{ github.sha }}
           labels: |
             COMMIT_SHA=${{ github.sha }}
+
+      - name: Done
+        run: echo build succesfully!
