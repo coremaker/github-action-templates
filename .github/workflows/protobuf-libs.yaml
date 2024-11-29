@@ -1,0 +1,149 @@
+name: protobuf-libs
+
+on:
+  workflow_call:
+    inputs:
+      JAR_WORKING_DIR:
+        required: false
+        type: string
+        default: "./protobuf"
+      GRAPHQL_WORKING_DIR:
+        required: true
+        type: string
+      JAVASCRIPT_WORKING_DIR:
+        required: true
+        type: string
+      PYTHON_WORKING_DIR:
+        required: true
+        type: string
+      PYTHON_REPOSITORY_URL:
+        required: true
+        type: string
+      BUF_CHECK_PATH:
+        required: true
+        type: string
+      JAVA_VERSION:
+        required: false
+        type: number
+        default: 17
+      JAVA_DISTRIBUTION:
+        required: false
+        type: string
+        default: 'corretto'
+      NODE_VERSION:
+        required: false
+        type: number
+        default: 16
+      WORKLOAD_IDENTITY_PROVIDER:
+        type: string
+        required: true
+      WIP_SERVICE_ACCOUNT:
+        type: string
+        required: true
+      TIMEOUT_MINUTES:
+        required: false
+        type: number
+        default: 15
+      PR_CHECK:
+        required: false 
+        type: boolean
+        default: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ inputs.TIMEOUT_MINUTES }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4.2.2
+        with:
+          fetch-depth: '0'
+
+      - name: Authenticate with GCP
+        # if: github.event_name == 'push'
+        id: auth
+        uses: google-github-actions/auth@v2.1.7
+        with:
+          workload_identity_provider: ${{ inputs.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ inputs.WIP_SERVICE_ACCOUNT }}
+          token_format: 'access_token'
+          access_token_lifetime: '900s'
+          create_credentials_file: true
+
+      - name: Setup JAVA
+        uses: actions/setup-java@v4.5.0
+        with:
+          java-version: ${{ inputs.JAVA_VERSION }}
+          distribution: ${{ inputs.JAVA_DISTRIBUTION }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4.1.0
+        with:
+          node-version: ${{ inputs.NODE_VERSION }}
+
+      - name: Setup Protoc
+        uses: arduino/setup-protoc@v3.0.0
+
+      - name: Setup BUF
+        uses: bufbuild/buf-setup-action@v1.47.2
+
+      - name: Set up Python
+        uses: actions/setup-python@v5.3.0
+        with:
+          python-version: '3.9'
+
+      - name: Check breaking BUF
+        id: buf_check
+        uses: bufbuild/buf-breaking-action@v1.1.4
+        with:
+          input: 'protobuf'
+          against: ${{ inputs.BUF_CHECK_PATH }}
+
+      - name: Show BUF results
+        if: ${{ steps.buf_check.conclusion == 'failure' }}
+        run: |
+          echo "BUF Results:"
+          echo "${{ steps.buf_check.outputs.results }}"
+
+      - name: Buf Generate
+        working-directory: ${{ inputs.JAR_WORKING_DIR }}
+        run: buf generate
+
+      - name: Install npm dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        working-directory: ${{ inputs.NODE_VERSION }}
+        run: npm ci
+
+      - name: Execute Build
+        working-directory: ${{ inputs.JAR_WORKING_DIR }}
+        run: ./gradlew clean build jar
+
+      - name: Get npm access token for GraphQL publishing
+        # if: github.event_name == 'push'
+        working-directory: ${{ inputs.GRAPHQL_WORKING_DIR }}
+        run: npx google-artifactregistry-auth
+
+      - name: Publish GraphQL library
+        # if: github.event_name == 'push'
+        working-directory: ${{ inputs.GRAPHQL_WORKING_DIR }}
+        run: npm publish
+
+      - name: Get npm access token for JavaScript publishing
+        # if: github.event_name == 'push'
+        working-directory: ${{ inputs.JAVASCRIPT_WORKING_DIR }}
+        run: npx google-artifactregistry-auth
+
+      - name: Publish JavaScript library
+        # if: github.event_name == 'push'
+        working-directory: ${{ inputs.JAVASCRIPT_WORKING_DIR }}
+        run: npm publish
+
+      - name: Publish Java library
+        # if: github.event_name == 'push'
+        working-directory: ${{ inputs.JAR_WORKING_DIR }}
+        run: ./gradlew publish
+
+      - name: Publish Python library
+        # if: github.event_name == 'push'
+        working-directory: ${{ inputs.PYTHON_WORKING_DIR }}
+        run: python3 -m twine upload --repository-url ${{ inputs.PYTHON_REPOSITORY_URL }} ./dist/*
