@@ -121,7 +121,7 @@ jobs:
 
       - name: Install npm dependencies
         if: steps.cache.outputs.cache-hit != 'true'
-        working-directory: ${{ inputs.NODE_VERSION }}
+        working-directory: ${{ inputs.PROTOBUF_WORKING_DIR }}
         run: npm ci
 
       - name: Execute Build
