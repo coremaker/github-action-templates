@@ -60,7 +60,7 @@ jobs:
           fetch-depth: '0'
 
       - name: Authenticate with GCP
-        # if: github.event_name == 'push'
+        if: ${{ inputs.PR_CHECK == false }}
         id: auth
         uses: google-github-actions/auth@v2.1.7
         with:
@@ -69,6 +69,9 @@ jobs:
           token_format: 'access_token'
           access_token_lifetime: '900s'
           create_credentials_file: true
+      
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2.1.2
 
       - name: Setup JAVA
         uses: actions/setup-java@v4.5.0
@@ -114,36 +117,41 @@ jobs:
         working-directory: ${{ inputs.NODE_VERSION }}
         run: npm ci
 
+      - name: Validate Build version
+        if: ${{ inputs.PR_CHECK == false }}
+        working-directory: ${{ inputs.JAR_WORKING_DIR }}
+        run: ./gradlew validateBuildVersion
+
       - name: Execute Build
         working-directory: ${{ inputs.JAR_WORKING_DIR }}
         run: ./gradlew clean build jar
 
       - name: Get npm access token for GraphQL publishing
-        # if: github.event_name == 'push'
+        if: ${{ inputs.PR_CHECK == false }}
         working-directory: ${{ inputs.GRAPHQL_WORKING_DIR }}
         run: npx google-artifactregistry-auth
 
       - name: Publish GraphQL library
-        # if: github.event_name == 'push'
+        if: ${{ inputs.PR_CHECK == false }}
         working-directory: ${{ inputs.GRAPHQL_WORKING_DIR }}
         run: npm publish
 
       - name: Get npm access token for JavaScript publishing
-        # if: github.event_name == 'push'
+        if: ${{ inputs.PR_CHECK == false }}
         working-directory: ${{ inputs.JAVASCRIPT_WORKING_DIR }}
         run: npx google-artifactregistry-auth
 
       - name: Publish JavaScript library
-        # if: github.event_name == 'push'
+        if: ${{ inputs.PR_CHECK == false }}
         working-directory: ${{ inputs.JAVASCRIPT_WORKING_DIR }}
         run: npm publish
 
       - name: Publish Java library
-        # if: github.event_name == 'push'
+        if: ${{ inputs.PR_CHECK == false }}
         working-directory: ${{ inputs.JAR_WORKING_DIR }}
         run: ./gradlew publish
 
       - name: Publish Python library
-        # if: github.event_name == 'push'
+        if: ${{ inputs.PR_CHECK == false }}
         working-directory: ${{ inputs.PYTHON_WORKING_DIR }}
         run: python3 -m twine upload --repository-url ${{ inputs.PYTHON_REPOSITORY_URL }} ./dist/*
