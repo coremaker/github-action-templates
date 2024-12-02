@@ -79,7 +79,6 @@ jobs:
           distribution: ${{ inputs.JAVA_DISTRIBUTION }}
 
       - name: Validate Build version
-        if: ${{ inputs.PR_CHECK == false }}
         working-directory: ${{ inputs.PROTOBUF_WORKING_DIR }}
         run: ./gradlew validateBuildVersion
 
