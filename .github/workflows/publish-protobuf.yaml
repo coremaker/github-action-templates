@@ -3,14 +3,14 @@ name: publish-protobuf
 on:
   workflow_call:
     inputs:
-      JAR_WORKING_DIR:
+      PROTOBUF_WORKING_DIR:
         required: false
         type: string
         default: "./protobuf"
-      GRAPHQL_WORKING_DIR:
+      TS_WORKING_DIR:
         required: true
         type: string
-      JAVASCRIPT_WORKING_DIR:
+      TS_ROOT_WORKING_DIR:
         required: true
         type: string
       PYTHON_WORKING_DIR:
@@ -79,6 +79,11 @@ jobs:
           java-version: ${{ inputs.JAVA_VERSION }}
           distribution: ${{ inputs.JAVA_DISTRIBUTION }}
 
+      - name: Validate Build version
+        if: ${{ inputs.PR_CHECK == false }}
+        working-directory: ${{ inputs.PROTOBUF_WORKING_DIR }}
+        run: ./gradlew validateBuildVersion
+
       - name: Set up Node.js
         uses: actions/setup-node@v4.1.0
         with:
@@ -95,6 +100,12 @@ jobs:
         with:
           python-version: '3.9'
 
+      - name: Install required Python packages
+        run: |
+            python3 -m pip install keyring
+            python3 -m pip install keyrings.google-artifactregistry-auth
+            python3 -m pip install twine
+
       - name: Check breaking BUF
         id: buf_check
         uses: bufbuild/buf-breaking-action@v1.1.4
@@ -108,47 +119,38 @@ jobs:
           echo "BUF Results:"
           echo "${{ steps.buf_check.outputs.results }}"
 
-      - name: Buf Generate
-        working-directory: ${{ inputs.JAR_WORKING_DIR }}
-        run: buf generate
-
       - name: Install npm dependencies
         if: steps.cache.outputs.cache-hit != 'true'
         working-directory: ${{ inputs.NODE_VERSION }}
         run: npm ci
 
-      - name: Validate Build version
-        if: ${{ inputs.PR_CHECK == false }}
-        working-directory: ${{ inputs.JAR_WORKING_DIR }}
-        run: ./gradlew validateBuildVersion
-
       - name: Execute Build
-        working-directory: ${{ inputs.JAR_WORKING_DIR }}
+        working-directory: ${{ inputs.PROTOBUF_WORKING_DIR }}
         run: ./gradlew clean build jar
 
-      - name: Get npm access token for GraphQL publishing
+      - name: Get npm access token for TypeScript publishing
         if: ${{ inputs.PR_CHECK == false }}
-        working-directory: ${{ inputs.GRAPHQL_WORKING_DIR }}
+        working-directory: ${{ inputs.TS_WORKING_DIR }}
         run: npx google-artifactregistry-auth
 
-      - name: Publish GraphQL library
+      - name: Publish TypeScript library
         if: ${{ inputs.PR_CHECK == false }}
-        working-directory: ${{ inputs.GRAPHQL_WORKING_DIR }}
+        working-directory: ${{ inputs.TS_WORKING_DIR }}
         run: npm publish
 
-      - name: Get npm access token for JavaScript publishing
+      - name: Get npm access token for TypeScript Root publishing
         if: ${{ inputs.PR_CHECK == false }}
-        working-directory: ${{ inputs.JAVASCRIPT_WORKING_DIR }}
+        working-directory: ${{ inputs.TS_ROOT_WORKING_DIR}}
         run: npx google-artifactregistry-auth
 
-      - name: Publish JavaScript library
+      - name: Publish TypeScript Root library
         if: ${{ inputs.PR_CHECK == false }}
-        working-directory: ${{ inputs.JAVASCRIPT_WORKING_DIR }}
+        working-directory: ${{ inputs.TS_ROOT_WORKING_DIR }}
         run: npm publish
 
       - name: Publish Java library
         if: ${{ inputs.PR_CHECK == false }}
-        working-directory: ${{ inputs.JAR_WORKING_DIR }}
+        working-directory: ${{ inputs.PROTOBUF_WORKING_DIR }}
         run: ./gradlew publish
 
       - name: Publish Python library
