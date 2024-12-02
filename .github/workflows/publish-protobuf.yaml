@@ -1,4 +1,4 @@
-name: protobuf-libs
+name: publish-protobuf
 
 on:
   workflow_call:
