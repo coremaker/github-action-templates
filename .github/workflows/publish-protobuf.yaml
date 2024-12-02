@@ -135,31 +135,31 @@ jobs:
         run: ./gradlew clean build jar
 
       - name: Get npm access token for TypeScript publishing
-        # if: ${{ inputs.PR_CHECK == false }}
+        if: ${{ inputs.PR_CHECK == false }}
         working-directory: ${{ inputs.TS_WORKING_DIR }}
         run: npx google-artifactregistry-auth
 
       - name: Publish TypeScript library
-        # if: ${{ inputs.PR_CHECK == false }}
+        if: ${{ inputs.PR_CHECK == false }}
         working-directory: ${{ inputs.TS_WORKING_DIR }}
         run: npm publish
 
       - name: Get npm access token for TypeScript Root publishing
-        # if: ${{ inputs.PR_CHECK == false }}
+        if: ${{ inputs.PR_CHECK == false }}
         working-directory: ${{ inputs.TS_ROOT_WORKING_DIR}}
         run: npx google-artifactregistry-auth
 
       - name: Publish TypeScript Root library
-        # if: ${{ inputs.PR_CHECK == false }}
+        if: ${{ inputs.PR_CHECK == false }}
         working-directory: ${{ inputs.TS_ROOT_WORKING_DIR }}
         run: npm publish
 
       - name: Publish Java library
-        # if: ${{ inputs.PR_CHECK == false }}
+        if: ${{ inputs.PR_CHECK == false }}
         working-directory: ${{ inputs.PROTOBUF_WORKING_DIR }}
         run: ./gradlew publish
 
       - name: Publish Python library
-        # if: ${{ inputs.PR_CHECK == false }}
+        if: ${{ inputs.PR_CHECK == false }}
         working-directory: ${{ inputs.PYTHON_WORKING_DIR }}
         run: python3 -m twine upload --repository-url ${{ inputs.PYTHON_REPOSITORY_URL }} ./dist/*
