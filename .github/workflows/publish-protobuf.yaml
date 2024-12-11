@@ -98,6 +98,12 @@ jobs:
         with:
           version: "23.x"
 
+      - name: Install Protoc Plugin
+        if: ${{ inputs.ENABLE_PROTOC }}
+        run: |
+            python3 -m pip install -U --pre betterproto
+            python3 -m pip install -U --pre "betterproto[compiler]"
+
       - name: Setup BUF
         uses: bufbuild/buf-setup-action@v1.47.2
         with:
