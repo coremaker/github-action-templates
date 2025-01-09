@@ -1,0 +1,100 @@
+name: Python
+
+on:
+  workflow_call:
+    inputs:
+      SERVICE_NAME:
+        required: true
+        type: string
+      WORKING_DIR:
+        required: false
+        type: string
+        default: "."
+      GCR_REGISTRY:
+        required: false
+        type: string
+        default: 'gcr.io'
+      GCR_REGISTRY_PROJECT:
+        required: true
+        type: string
+      PR_CHECK:
+        required: false 
+        type: boolean
+        default: false
+      PYTHON_VERSION:
+        required: false
+        type: number
+        default: 3.13
+    secrets:
+      GCR_JSON_KEY:
+        required: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ inputs.WORKING_DIR }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        id: setup-python
+        uses: actions/setup-python@v5.3.0
+        with:
+          python-version: ${{ inputs.PYTHON_VERSION }}
+
+      - name: Install poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: latest
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+          virtualenvs-path: .venv
+          installer-parallel: true
+
+      - name: Load cached venv
+        id: cached-poetry-dependencies
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
+
+      - name: Install dependencies
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        run: poetry install --no-interaction --no-root
+
+      - name: Install project
+        run: poetry install --no-interaction  
+
+      - name: Login to GCR
+        if: ${{ inputs.PR_CHECK == false }}
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ inputs.GCR_REGISTRY }}
+          username: _json_key
+          password: ${{ secrets.GCR_JSON_KEY }}
+
+      - name: Build Docker Image
+        uses: docker/build-push-action@v3
+        with:
+          context: ${{ inputs.WORKING_DIR }}
+          push: false
+          tags: ${{ inputs.GCR_REGISTRY }}/${{ inputs.GCR_REGISTRY_PROJECT }}/${{ inputs.SERVICE_NAME }}:latest,${{ inputs.GCR_REGISTRY }}/${{ inputs.GCR_REGISTRY_PROJECT }}/${{ inputs.SERVICE_NAME }}:${{ github.sha }}
+          labels: |
+            COMMIT_SHA=${{ github.sha }}
+
+      - name: Push Docker Image
+        if: ${{ inputs.PR_CHECK == false }}
+        uses: docker/build-push-action@v3
+        with:
+          context: ${{ inputs.WORKING_DIR }}
+          push: true
+          tags: ${{ inputs.GCR_REGISTRY }}/${{ inputs.GCR_REGISTRY_PROJECT }}/${{ inputs.SERVICE_NAME }}:latest,${{ inputs.GCR_REGISTRY }}/${{ inputs.GCR_REGISTRY_PROJECT }}/${{ inputs.SERVICE_NAME }}:${{ github.sha }}
+          labels: |
+            COMMIT_SHA=${{ github.sha }}
+
+      - name: Done
+        run: echo build succesfully!
