@@ -127,9 +127,7 @@ jobs:
 
       - name: Check breaking BUF
         id: buf_check
-        if: |
-            github.event_name == 'pull_request' &&
-            ${{ inputs.ENABLE_BUF_CHECK }}
+        if: ${{ github.event_name == 'pull_request' && inputs.ENABLE_BUF_CHECK }}
         uses: bufbuild/buf-breaking-action@v1.1.4
         with:
           input: 'protobuf'
