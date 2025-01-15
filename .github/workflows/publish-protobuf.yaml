@@ -52,6 +52,11 @@ on:
         required: false 
         type: boolean
         default: false
+      ENABLE_BUF_CHECK:
+        required: false
+        type: boolean
+        default: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -122,7 +127,7 @@ jobs:
 
       - name: Check breaking BUF
         id: buf_check
-        if: github.event_name == 'pull_request'
+        if: ${{ github.event_name == 'pull_request' && inputs.ENABLE_BUF_CHECK }}
         uses: bufbuild/buf-breaking-action@v1.1.4
         with:
           input: 'protobuf'
