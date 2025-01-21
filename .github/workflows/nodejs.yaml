@@ -50,6 +50,8 @@ on:
         required: true
       HIVE_TOKEN:
         required: false
+      UPLOAD_TO_BUCKET_TEST:
+        required: true
 jobs:
   build:
     runs-on: ubuntu-latest
