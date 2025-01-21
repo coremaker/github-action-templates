@@ -61,6 +61,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: Auth to GCP
+        uses: 'google-github-actions/auth@v2'
+        with:
+          credentials_json: '${{ secrets.UPLOAD_TO_BUCKET_TEST }}'
+
+      - name: 'Set up Cloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v2'
+
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
@@ -91,6 +99,11 @@ jobs:
       - name: Build App
         id: build
         run: npm run build
+
+      - name: Upload files to GCS
+        if: github.event_name == 'pull_request'
+        run: |
+          gsutil -m cp -r ./template/* gs://code-storage-dev/test-upload/
 
       - name: Schema Check
         if: ${{ inputs.SCHEMA_CHECK }}
