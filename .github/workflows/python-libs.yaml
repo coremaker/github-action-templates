@@ -86,7 +86,7 @@ jobs:
         if: ${{ inputs.PR_CHECK == false }}
         run: |
           poetry config repositories.${{ inputs.GCR_REGISTRY_NAME }} https://europe-python.pkg.dev/${{ inputs.GCR_REGISTRY_PROJECT }}/${{ inputs.GCR_REGISTRY_NAME }}/ --no-interaction
-          poetry config http-basic.${{ inputs.GCR_REGISTRY_NAME }} oauth2accesstoken ${{ secrets.GCR_JSON_KEY }}
+          poetry config http-basic.${{ inputs.GCR_REGISTRY_NAME }} oauth2accesstoken $(gcloud auth print-access-token)
 
       - name: Publish project
         if: ${{ inputs.PR_CHECK == false }}
