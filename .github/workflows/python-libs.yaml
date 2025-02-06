@@ -84,8 +84,10 @@ jobs:
 
       - name: Poetry GCP auth
         if: ${{ inputs.PR_CHECK == false }}
-        run: poetry config repositories.${{ inputs.GCR_REGISTRY_NAME }} https://europe-python.pkg.dev/${{ inputs.GCR_REGISTRY_PROJECT }}/${{ inputs.GCR_REGISTRY_NAME }}/ --no-interaction
-        
+        run: |
+        poetry config repositories.${{ inputs.GCR_REGISTRY_NAME }} https://europe-python.pkg.dev/${{ inputs.GCR_REGISTRY_PROJECT }}/${{ inputs.GCR_REGISTRY_NAME }}/ --no-interaction
+        poetry config http-basic.${{ inputs.GCR_REGISTRY_NAME }} oauth2accesstoken ${{ secrets.GCR_JSON_KEY }}
+
       - name: Publish project
         if: ${{ inputs.PR_CHECK == false }}
         run: poetry publish -r ${{ inputs.GCR_REGISTRY_NAME }} --no-interaction  
