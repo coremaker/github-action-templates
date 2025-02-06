@@ -14,6 +14,10 @@ on:
         required: false
         type: string
         default: 'gcr.io'
+      GCR_REGISTRY_ROOT_NAME:
+        required: false
+        type: string
+        default: 'europe-python.pkg.dev'
       GCR_REGISTRY_PROJECT:
         required: true
         type: string
@@ -74,7 +78,7 @@ jobs:
       - name: Poetry GCP auth
         if: ${{ inputs.PR_CHECK == false }}
         run: |
-          poetry config repositories.${{ inputs.GCR_REGISTRY_NAME }} https://europe-python.pkg.dev/${{ inputs.GCR_REGISTRY_PROJECT }}/${{ inputs.GCR_REGISTRY_NAME }}/ --no-interaction
+          poetry config repositories.${{ inputs.GCR_REGISTRY_NAME }} https://${{ inputs.GCR_REGISTRY_ROOT_NAME }}/${{ inputs.GCR_REGISTRY_PROJECT }}/${{ inputs.GCR_REGISTRY_NAME }}/ --no-interaction
           poetry config http-basic.${{ inputs.GCR_REGISTRY_NAME }} oauth2accesstoken $(gcloud auth print-access-token)
 
       - name: Publish project
