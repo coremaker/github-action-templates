@@ -1,0 +1,89 @@
+name: Python
+
+on:
+  workflow_call:
+    inputs:
+      SERVICE_NAME:
+        required: true
+        type: string
+      WORKING_DIR:
+        required: false
+        type: string
+        default: "."
+      GCR_REGISTRY_NAME:
+        required: false
+        type: string
+        default: 'gcr.io'
+      GCR_REGISTRY_ROOT_NAME:
+        required: false
+        type: string
+        default: 'europe-python.pkg.dev'
+      GCR_REGISTRY_PROJECT:
+        required: true
+        type: string
+      PR_CHECK:
+        required: false 
+        type: boolean
+        default: false
+      PYTHON_VERSION:
+        required: false
+        type: number
+        default: 3.13
+    secrets:
+      GCR_JSON_KEY:
+        required: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ inputs.WORKING_DIR }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        id: setup-python
+        uses: actions/setup-python@v5.3.0
+        with:
+          python-version: ${{ inputs.PYTHON_VERSION }}
+
+      - name: Install poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: latest
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+          virtualenvs-path: .venv
+          installer-parallel: true
+
+      - name: Poetry lock
+        run: poetry lock --no-interaction
+
+      - name: Install project
+        run: poetry install --no-interaction  
+
+      - name: Build project
+        run: poetry build --no-interaction
+
+      - name: Authenticate to Google Cloud
+        if: ${{ inputs.PR_CHECK == false }}
+        uses: google-github-actions/auth@v2
+        with:
+          project_id: ${{ inputs.GCR_REGISTRY_PROJECT }}
+          credentials_json: ${{ secrets.GCR_JSON_KEY }}
+
+      - name: Poetry GCP auth
+        if: ${{ inputs.PR_CHECK == false }}
+        run: |
+          poetry config repositories.${{ inputs.GCR_REGISTRY_NAME }} https://${{ inputs.GCR_REGISTRY_ROOT_NAME }}/${{ inputs.GCR_REGISTRY_PROJECT }}/${{ inputs.GCR_REGISTRY_NAME }}/ --no-interaction
+          poetry config http-basic.${{ inputs.GCR_REGISTRY_NAME }} oauth2accesstoken $(gcloud auth print-access-token)
+
+      - name: Publish project
+        if: ${{ inputs.PR_CHECK == false }}
+        run: poetry publish -r ${{ inputs.GCR_REGISTRY_NAME }} --no-interaction  
+
+      - name: Done
+        run: echo build succesfully!
