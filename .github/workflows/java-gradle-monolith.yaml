@@ -41,6 +41,16 @@ on:
         required: false 
         type: boolean
         default: false
+      GCP_AUTH:
+        required: false 
+        type: boolean
+        default: false
+      WORKLOAD_IDENTITY_PROVIDER:
+        type: string
+        required: true
+      WIP_SERVICE_ACCOUNT:
+        type: string
+        required: true
     secrets:
       GCR_JSON_KEY:
         required: true
@@ -60,6 +70,17 @@ jobs:
         with:
           java-version: ${{ inputs.JAVA_VERSION }}
           distribution: ${{ inputs.JAVA_DISTRIBUTION }}
+
+      - name: Authenticate with GCP
+        if: ${{ inputs.GCP_AUTH }}
+        id: auth
+        uses: google-github-actions/auth@v2.1.7
+        with:
+          workload_identity_provider: ${{ inputs.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ inputs.WIP_SERVICE_ACCOUNT }}
+          token_format: 'access_token'
+          access_token_lifetime: '900s'
+          create_credentials_file: true
 
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2
