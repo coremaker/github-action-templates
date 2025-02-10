@@ -29,8 +29,11 @@ on:
         required: false
         type: number
         default: 3.13
-    secrets:
-      GCR_JSON_KEY:
+      WORKLOAD_IDENTITY_PROVIDER:
+        type: string
+        required: true
+      WIP_SERVICE_ACCOUNT:
+        type: string
         required: true
 
 jobs:
@@ -68,12 +71,16 @@ jobs:
       - name: Build project
         run: poetry build --no-interaction
 
-      - name: Authenticate to Google Cloud
-        if: ${{ inputs.PR_CHECK == false }}
-        uses: google-github-actions/auth@v2
+      - name: Authenticate with GCP
+        if: ${{ inputs.PR_CHECK}}
+        id: auth
+        uses: google-github-actions/auth@v2.1.7
         with:
-          project_id: ${{ inputs.GCR_REGISTRY_PROJECT }}
-          credentials_json: ${{ secrets.GCR_JSON_KEY }}
+          workload_identity_provider: ${{ inputs.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ inputs.WIP_SERVICE_ACCOUNT }}
+          token_format: 'access_token'
+          access_token_lifetime: '900s'
+          create_credentials_file: true
 
       - name: Poetry GCP auth
         if: ${{ inputs.PR_CHECK == false }}
