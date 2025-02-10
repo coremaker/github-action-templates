@@ -72,7 +72,7 @@ jobs:
         run: poetry build --no-interaction
 
       - name: Authenticate with GCP
-        if: ${{ inputs.PR_CHECK == false }}
+        if: ${{ inputs.PR_CHECK}}
         id: auth
         uses: google-github-actions/auth@v2.1.7
         with:
