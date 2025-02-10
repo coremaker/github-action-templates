@@ -29,9 +29,15 @@ on:
         required: false
         type: number
         default: 3.13
-    secrets:
-      GCR_JSON_KEY:
+      WORKLOAD_IDENTITY_PROVIDER:
+        type: string
         required: true
+      WIP_SERVICE_ACCOUNT:
+        type: string
+        required: true
+    # secrets:
+    #   GCR_JSON_KEY:
+    #     required: true
 
 jobs:
   build:
