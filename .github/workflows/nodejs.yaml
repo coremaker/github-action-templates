@@ -102,8 +102,8 @@ jobs:
         with:
           version: "23.x"
 
-      - name: Install dependencies
-        if: ${{ inputs.GCP_AUTH }} && steps.cache.outputs.cache-hit != 'true'
+      - name: Run Preinstall
+        if: ${{ (${{ inputs.GCP_AUTH }}) && (steps.cache.outputs.cache-hit != 'true') }}
         run: npm run preinstall
 
       - name: Install dependencies
