@@ -34,6 +34,10 @@ on:
         required: false
         type: number
         default: 16
+      GCP_AUTH:
+        required: false 
+        type: boolean
+        default: false
       WORKLOAD_IDENTITY_PROVIDER:
         type: string
         required: true
@@ -69,6 +73,7 @@ jobs:
           fetch-depth: '0'
 
       - name: Authenticate with GCP
+        if: ${{ inputs.GCP_AUTH }}
         id: auth
         uses: google-github-actions/auth@v2.1.7
         with:
