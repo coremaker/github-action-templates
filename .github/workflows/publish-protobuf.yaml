@@ -34,6 +34,10 @@ on:
         required: false
         type: number
         default: 16
+      GCP_AUTH:
+        required: false 
+        type: boolean
+        default: false
       WORKLOAD_IDENTITY_PROVIDER:
         type: string
         required: true
@@ -69,6 +73,7 @@ jobs:
           fetch-depth: '0'
 
       - name: Authenticate with GCP
+        if: ${{ inputs.GCP_AUTH }}
         id: auth
         uses: google-github-actions/auth@v2.1.7
         with:
@@ -88,7 +93,7 @@ jobs:
           distribution: ${{ inputs.JAVA_DISTRIBUTION }}
 
       - name: Validate Build version
-        if: github.event_name == 'pull_request'
+        if: ${{ inputs.PR_CHECK == false }}
         working-directory: ${{ inputs.PROTOBUF_WORKING_DIR }}
         run: ./gradlew validateBuildVersion
 
