@@ -20,11 +20,7 @@ on:
       WIP_SERVICE_ACCOUNT:
         type: string
         required: true
-      GCP_AUTH:
-        required: false 
-        type: boolean
-        default: false
-        
+
 jobs:
   build:
     runs-on: ubuntu-latest
