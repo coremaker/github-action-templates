@@ -50,4 +50,4 @@ jobs:
       - name: Upload files to GCS
         # if: ${{ inputs.PR_CHECK == false }}
         run: |
-          gsutil -m rsync -r -d ./templates/ gs://code-storage-dev/templates/
+          gsutil -m rsync -r -d ./ gs://code-storage-dev/templates/
