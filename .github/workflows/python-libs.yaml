@@ -76,7 +76,7 @@ jobs:
         run: poetry build --no-interaction
 
       - name: Authenticate with GCP
-        if: ${{ inputs.GCP_AUTH}} && ${{ inputs.PR_CHECK == false }}
+        if: ${{ inputs.GCP_AUTH}}
         id: auth
         uses: google-github-actions/auth@v2.1.7
         with:
@@ -87,7 +87,7 @@ jobs:
           create_credentials_file: true
 
       - name: Poetry GCP auth
-        if: ${{ inputs.GCP_AUTH}} && ${{ inputs.PR_CHECK == false }}
+        if: ${{ inputs.GCP_AUTH}}
         run: |
           poetry config repositories.${{ inputs.GCR_REGISTRY_NAME }} https://${{ inputs.GCR_REGISTRY_ROOT_NAME }}/${{ inputs.GCR_REGISTRY_PROJECT }}/${{ inputs.GCR_REGISTRY_NAME }}/ --no-interaction
           poetry config http-basic.${{ inputs.GCR_REGISTRY_NAME }} oauth2accesstoken $(gcloud auth print-access-token)
