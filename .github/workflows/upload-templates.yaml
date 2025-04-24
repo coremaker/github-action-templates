@@ -19,7 +19,7 @@ on:
       NODE_VERSION:
         required: false
         type: number
-        default: 16
+        default: 22
       COMPONENTS_WORKING_DIR:
         required: true
         type: string
