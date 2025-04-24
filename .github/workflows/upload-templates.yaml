@@ -67,6 +67,7 @@ jobs:
           node-version: ${{ inputs.NODE_VERSION }}
 
       - name: Upload files to GCS
+        if: ${{ inputs.PR_CHECK == false }}
         run: |
           gsutil -m rsync -r -d ./ gs://code-storage-dev/templates/
 
@@ -84,6 +85,11 @@ jobs:
         if: ${{ steps.cache.outputs.cache-hit != 'true' }} && ${{ steps.components_folder_changed.outputs.changed == 'true' }} && ${{ inputs.PR_CHECK == true }}
         working-directory: ${{ inputs.COMPONENTS_WORKING_DIR }}
         run: npm ci
+
+      - name: Get npm access token for NPM publishing
+        if: ${{ steps.components_folder_changed.outputs.changed == 'true' }} && ${{ inputs.PR_CHECK == true }}
+        working-directory: ${{ inputs.COMPONENTS_WORKING_DIR }}
+        run: npx google-artifactregistry-auth
 
       - name: Publish NPM library
         if: ${{ inputs.PR_CHECK == true }} && ${{ steps.components_folder_changed.outputs.changed == 'true' }}
