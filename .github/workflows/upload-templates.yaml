@@ -16,19 +16,37 @@ on:
       WIP_SERVICE_ACCOUNT:
         type: string
         required: true
+      NODE_VERSION:
+        required: false
+        type: number
+        default: 16
+      COMPONENTS_WORKING_DIR:
+        required: true
+        type: string
+      TIMEOUT_MINUTES:
+        required: false
+        type: number
+        default: 15
+      PR_CHECK:
+        required: false 
+        type: boolean
+        default: false
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: ${{ inputs.TIMEOUT_MINUTES }}
     defaults:
       run:
         working-directory: ${{ inputs.WORKING_DIR }}
 
     steps:
       - name: Checkout
+        if: ${{ inputs.PR_CHECK == true }}
         uses: actions/checkout@v3
 
       - name: Authenticate with GCP
+        if: ${{ inputs.PR_CHECK == true }}
         id: auth
         uses: google-github-actions/auth@v2.1.7
         with:
@@ -39,8 +57,35 @@ jobs:
           create_credentials_file: true
 
       - name: Set up Cloud SDK
+        if: ${{ inputs.PR_CHECK == true }}
         uses: google-github-actions/setup-gcloud@v2.1.2
+
+      - name: Set up Node.js
+        if: ${{ inputs.PR_CHECK == true }}
+        uses: actions/setup-node@v4.1.0
+        with:
+          node-version: ${{ inputs.NODE_VERSION }}
 
       - name: Upload files to GCS
         run: |
           gsutil -m rsync -r -d ./ gs://code-storage-dev/templates/
+
+      - name: Check if components folder has changes
+        if: ${{ inputs.PR_CHECK == true }}
+        id: folder_changed
+        run: |
+          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '^app9-components/'; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install npm dependencies
+        if: ${{ steps.cache.outputs.cache-hit != 'true' }} && ${{ steps.components_folder_changed.outputs.changed == 'true' }} && ${{ inputs.PR_CHECK == true }}
+        working-directory: ${{ inputs.COMPONENTS_WORKING_DIR }}
+        run: npm ci
+
+      - name: Publish NPM library
+        if: ${{ inputs.PR_CHECK == true }} && ${{ steps.components_folder_changed.outputs.changed == 'true' }}
+        working-directory: ${{ inputs.COMPONENTS_WORKING_DIR }}
+        run: npm publish
