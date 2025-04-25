@@ -95,6 +95,7 @@ jobs:
           done < files.txt
 
           echo "run_job=$run_job" >> "$GITHUB_OUTPUT"
+          cat "$GITHUB_OUTPUT"
 
 
       - name: Install npm dependencies
