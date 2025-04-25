@@ -42,13 +42,11 @@ jobs:
 
     steps:
       - name: Checkout
-        if: ${{ inputs.PR_CHECK == true }}
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
       - name: Authenticate with GCP
-        if: ${{ inputs.PR_CHECK == true }}
         id: auth
         uses: google-github-actions/auth@v2.1.7
         with:
@@ -59,11 +57,9 @@ jobs:
           create_credentials_file: true
 
       - name: Set up Cloud SDK
-        if: ${{ inputs.PR_CHECK == true }}
         uses: google-github-actions/setup-gcloud@v2.1.2
 
       - name: Set up Node.js
-        if: ${{ inputs.PR_CHECK == true }}
         uses: actions/setup-node@v4.1.0
         with:
           node-version: ${{ inputs.NODE_VERSION }}
@@ -74,7 +70,6 @@ jobs:
           gsutil -m rsync -r -d ./ gs://code-storage-dev/templates/
 
       - name: Check if app9-components folder has changes
-        if: ${{ inputs.PR_CHECK == true }}
         id: components_folder_changed
         run: |
           echo "=============== list modified files ==============="
@@ -99,16 +94,16 @@ jobs:
 
 
       - name: Install npm dependencies
-        if: ${{ inputs.PR_CHECK == 'true' && steps.components_folder_changed.outputs.run_job == 'true' }}
+        if: ${{ steps.components_folder_changed.outputs.run_job == 'true' }}
         working-directory: ${{ inputs.COMPONENTS_WORKING_DIR }}
         run: npm ci
 
       - name: Get npm access token for NPM publishing
-        if: ${{ inputs.PR_CHECK == 'true' && steps.components_folder_changed.outputs.run_job == 'true' }}
+        if: ${{ steps.components_folder_changed.outputs.run_job == 'true' }}
         working-directory: ${{ inputs.COMPONENTS_WORKING_DIR }}
         run: npx google-artifactregistry-auth
 
       - name: Publish NPM library
-        if: ${{ inputs.PR_CHECK == 'true' && steps.components_folder_changed.outputs.run_job == 'true' }}
+        if: ${{ steps.components_folder_changed.outputs.run_job == 'true' }}
         working-directory: ${{ inputs.COMPONENTS_WORKING_DIR }}
         run: npm publish
