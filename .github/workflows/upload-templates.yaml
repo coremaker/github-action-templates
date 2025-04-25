@@ -85,10 +85,10 @@ jobs:
 
           run_job=false
 
-          while IFS= read -r file; do
+          while IFS= read -r file || [ -n "$file" ]; do
             echo "$file"
-            if [[ "$file" != templates/app9-components/* ]]; then
-              echo "This modified file is NOT under the 'app9-components/' folder."
+            if [[ "$file" == templates/app9-components/* ]]; then
+              echo "Found a modified file in app9-components."
               run_job=true
               break
             fi
