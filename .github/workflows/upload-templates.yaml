@@ -98,7 +98,7 @@ jobs:
 
 
       - name: Install npm dependencies
-        if: ${{ steps.cache.outputs.cache-hit != 'true' && inputs.PR_CHECK == 'true' && steps.components_folder_changed.outputs.run_job == 'true' }}
+        if: ${{ inputs.PR_CHECK == 'true' && steps.components_folder_changed.outputs.run_job == 'true' }}
         working-directory: ${{ inputs.COMPONENTS_WORKING_DIR }}
         run: npm ci
 
