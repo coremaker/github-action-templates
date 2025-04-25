@@ -87,7 +87,7 @@ jobs:
 
           while IFS= read -r file; do
             echo "$file"
-            if [[ "$file" != ./app9-components/* ]]; then
+            if [[ "$file" != templates/app9-components/* ]]; then
               echo "This modified file is NOT under the 'app9-components/' folder."
               run_job=false
               break
