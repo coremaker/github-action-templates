@@ -86,7 +86,7 @@ jobs:
           fi
 
           echo "Comparing against $BASE"
-          if git diff --name-only $BASE | grep '^app9-components/'; then
+          if git diff --name-only $BASE | grep '^./templates/app9-components/'; then
             echo "changed=true" >> $GITHUB_OUTPUT
             echo "app9-components folder has changes"
           else
