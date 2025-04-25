@@ -44,6 +44,8 @@ jobs:
       - name: Checkout
         if: ${{ inputs.PR_CHECK == true }}
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - name: Authenticate with GCP
         if: ${{ inputs.PR_CHECK == true }}
@@ -71,14 +73,23 @@ jobs:
         run: |
           gsutil -m rsync -r -d ./ gs://code-storage-dev/templates/
 
-      - name: Check if components folder has changes
+      - name: Check if app9-components folder has changes
         if: ${{ inputs.PR_CHECK == true }}
         id: folder_changed
         run: |
-          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '^app9-components/'; then
-            echo "changed=true" >> "$GITHUB_OUTPUT"
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            git fetch origin ${{ github.base_ref }}
+            BASE=origin/${{ github.base_ref }}
           else
-            echo "changed=false" >> "$GITHUB_OUTPUT"
+            git fetch origin main
+            BASE=origin/main
+          fi
+
+          echo "Comparing against $BASE"
+          if git diff --name-only $BASE | grep '^app9-components/'; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
           fi
 
       - name: Install npm dependencies
