@@ -75,7 +75,7 @@ jobs:
 
       - name: Check if app9-components folder has changes
         if: ${{ inputs.PR_CHECK == true }}
-        id: folder_changed
+        id: components_folder_changed
         run: |
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
             git fetch origin ${{ github.base_ref }}
@@ -108,8 +108,3 @@ jobs:
         if: ${{ inputs.PR_CHECK == true }} && ${{ steps.components_folder_changed.outputs.changed == 'true' }}
         working-directory: ${{ inputs.COMPONENTS_WORKING_DIR }}
         run: npm publish
-
-      - name: Show npm debug log
-        if: failure() # Only run if a previous step failed
-        run: |
-          cat /home/runner/.npm/_logs/2025-04-25T*.log
