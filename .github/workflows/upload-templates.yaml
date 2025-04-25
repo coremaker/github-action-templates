@@ -83,13 +83,13 @@ jobs:
           
           echo "========== check paths of modified files =========="
 
-          run_job=true
+          run_job=false
 
           while IFS= read -r file; do
             echo "$file"
             if [[ "$file" != templates/app9-components/* ]]; then
               echo "This modified file is NOT under the 'app9-components/' folder."
-              run_job=false
+              run_job=true
               break
             fi
           done < files.txt
