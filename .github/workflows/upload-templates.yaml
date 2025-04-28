@@ -73,7 +73,17 @@ jobs:
         id: components_folder_changed
         run: |
           echo "=============== list modified files ==============="
-          git diff --name-only origin/main...HEAD > files.txt
+          
+          # For pull_request event: compare with merge-base
+          # For push to main: compare last commit with previous commit
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            git fetch origin main
+            BASE_SHA=$(git merge-base origin/main HEAD)
+            git diff --name-only "$BASE_SHA"...HEAD > files.txt
+          else
+            git diff --name-only HEAD~1 HEAD > files.txt
+          fi
+
           cat files.txt
           
           echo "========== check paths of modified files =========="
@@ -89,6 +99,7 @@ jobs:
           done < files.txt
 
           echo "run_job=$run_job" >> "$GITHUB_OUTPUT"
+
 
       - name: Validate NPM version
         if: ${{ steps.components_folder_changed.outputs.run_job == 'true' }}
