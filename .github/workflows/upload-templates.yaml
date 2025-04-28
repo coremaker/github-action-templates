@@ -112,11 +112,11 @@ jobs:
         run: npm ci
 
       - name: Get npm access token for NPM publishing
-        if: ${{ steps.components_folder_changed.outputs.run_job == 'true' && inputs.PR_CHECK == 'false' }}
+        if: ${{ steps.components_folder_changed.outputs.run_job == 'true' && inputs.PR_CHECK == false }}
         working-directory: ${{ inputs.COMPONENTS_WORKING_DIR }}
         run: npx google-artifactregistry-auth
 
       - name: Publish NPM library
-        if: ${{ steps.components_folder_changed.outputs.run_job == 'true' && inputs.PR_CHECK == 'false'}}
+        if: ${{ steps.components_folder_changed.outputs.run_job == 'true' && inputs.PR_CHECK == false }}
         working-directory: ${{ inputs.COMPONENTS_WORKING_DIR }}
         run: npm publish
