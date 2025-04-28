@@ -81,7 +81,6 @@ jobs:
           run_job=false
 
           while IFS= read -r file || [ -n "$file" ]; do
-            echo "$file"
             if [[ "$file" == templates/app9-components/* ]]; then
               echo "Found a modified file in app9-components."
               run_job=true
@@ -90,8 +89,11 @@ jobs:
           done < files.txt
 
           echo "run_job=$run_job" >> "$GITHUB_OUTPUT"
-          cat "$GITHUB_OUTPUT"
 
+      - name: Run npm pre-install
+        if: ${{ steps.components_folder_changed.outputs.run_job == 'true' }}
+        working-directory: ${{ inputs.COMPONENTS_WORKING_DIR }}
+        run: npm run preinstall
 
       - name: Install npm dependencies
         if: ${{ steps.components_folder_changed.outputs.run_job == 'true' }}
