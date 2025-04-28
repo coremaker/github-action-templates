@@ -47,6 +47,7 @@ jobs:
           fetch-depth: 0
 
       - name: Authenticate with GCP
+        if: ${{ inputs.PR_CHECK == false }}
         id: auth
         uses: google-github-actions/auth@v2.1.7
         with:
@@ -57,6 +58,7 @@ jobs:
           create_credentials_file: true
 
       - name: Set up Cloud SDK
+        if: ${{ inputs.PR_CHECK == false }}
         uses: google-github-actions/setup-gcloud@v2.1.2
 
       - name: Set up Node.js
@@ -96,16 +98,16 @@ jobs:
         run: npm run preinstall
 
       - name: Install npm dependencies
-        if: ${{ steps.components_folder_changed.outputs.run_job == 'true' }}
+        if: ${{ steps.components_folder_changed.outputs.run_job == 'true'&& steps.cache.outputs.cache-hit != 'true'}}
         working-directory: ${{ inputs.COMPONENTS_WORKING_DIR }}
         run: npm ci
 
       - name: Get npm access token for NPM publishing
-        if: ${{ steps.components_folder_changed.outputs.run_job == 'true' }}
+        if: ${{ steps.components_folder_changed.outputs.run_job == 'true' && inputs.PR_CHECK == 'false' }}
         working-directory: ${{ inputs.COMPONENTS_WORKING_DIR }}
         run: npx google-artifactregistry-auth
 
       - name: Publish NPM library
-        if: ${{ steps.components_folder_changed.outputs.run_job == 'true' }}
+        if: ${{ steps.components_folder_changed.outputs.run_job == 'true' && inputs.PR_CHECK == 'false'}}
         working-directory: ${{ inputs.COMPONENTS_WORKING_DIR }}
         run: npm publish
