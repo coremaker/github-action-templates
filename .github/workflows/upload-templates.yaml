@@ -90,7 +90,7 @@ jobs:
 
           echo "run_job=$run_job" >> "$GITHUB_OUTPUT"
 
-      - name: Run npm pre-install
+      - name: Validate NPM version
         if: ${{ steps.components_folder_changed.outputs.run_job == 'true' }}
         working-directory: ${{ inputs.COMPONENTS_WORKING_DIR }}
         run: npm run preinstall
