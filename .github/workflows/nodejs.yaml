@@ -76,22 +76,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Export ENV vars from github
-        uses: oNaiPs/secrets-to-env-action@v1
-        with:
-          secrets: ${{ toJSON(vars) }}
-
       - name: Export Secrets from github
         uses: oNaiPs/secrets-to-env-action@v1
         with:
           secrets: ${{ toJSON(secrets) }}
           exclude: GCR_JSON_KEY
 
-      - name: Export Secrets from github
+      - name: Export ENV vars from github
         uses: oNaiPs/secrets-to-env-action@v1
         with:
-          secrets: ${{ toJSON(env) }}
-          exclude: GCR_JSON_KEY
+          secrets: ${{ toJSON(vars) }}
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
