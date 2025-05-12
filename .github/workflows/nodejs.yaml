@@ -51,10 +51,10 @@ on:
         default: false
       WORKLOAD_IDENTITY_PROVIDER:
         type: string
-        required: true
+        required: false
       WIP_SERVICE_ACCOUNT:
         type: string
-        required: true
+        required: false
     secrets:
       GCR_JSON_KEY:
         required: true
