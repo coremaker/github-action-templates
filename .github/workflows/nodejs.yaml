@@ -55,6 +55,9 @@ on:
       WIP_SERVICE_ACCOUNT:
         type: string
         required: false
+      ENVIRONMENT:
+        type: string
+        required: false
     secrets:
       GCR_JSON_KEY:
         required: true
@@ -64,6 +67,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment: ${{ inputs.ENVIRONMENT }}
     defaults:
       run:
         working-directory: ${{ inputs.WORKING_DIR }}
