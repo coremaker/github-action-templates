@@ -51,10 +51,10 @@ on:
         default: false
       WORKLOAD_IDENTITY_PROVIDER:
         type: string
-        required: true
+        required: false
       WIP_SERVICE_ACCOUNT:
         type: string
-        required: true
+        required: false
     secrets:
       GCR_JSON_KEY:
         required: true
@@ -103,7 +103,7 @@ jobs:
           version: "23.x"
 
       - name: Run Preinstall
-        if: ${{ inputs.GCP_AUTH }} && (steps.cache.outputs.cache-hit != 'true')
+        if: inputs.GCP_AUTH && (steps.cache.outputs.cache-hit != 'true')
         run: npm run preinstall
 
       - name: Install dependencies
