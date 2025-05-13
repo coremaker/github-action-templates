@@ -58,7 +58,6 @@ on:
       ENVIRONMENT:
         type: string
         required: false
-    secrets:
       GCR_JSON_KEY:
         required: false
       HIVE_TOKEN:
@@ -137,7 +136,7 @@ jobs:
         if: ${{ inputs.SCHEMA_CHECK }}
         run: npm run schema:check
         env:
-          HIVE_TOKEN: ${{ secrets.HIVE_TOKEN }}
+          HIVE_TOKEN: ${{ inputs.HIVE_TOKEN }}
 
       - name: Login to GCR
         if: ${{ inputs.PR_CHECK == false }}
@@ -145,7 +144,7 @@ jobs:
         with:
           registry: ${{ inputs.GCR_REGISTRY }}
           username: _json_key
-          password: ${{ secrets.GCR_JSON_KEY }}
+          password: ${{ inputs.GCR_JSON_KEY }}
 
       - name: Build Docker Image
         uses: docker/build-push-action@v3
