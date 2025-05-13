@@ -60,7 +60,7 @@ on:
         required: false
     secrets:
       GCR_JSON_KEY:
-        required: true
+        required: false
       HIVE_TOKEN:
         required: false
 
