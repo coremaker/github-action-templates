@@ -73,7 +73,6 @@ jobs:
 
       - name: Export Secrets from github
         uses: oNaiPs/secrets-to-env-action@v1
-        environment: ${{ inputs.ENVIRONMENT }}
         with:
           secrets: ${{ toJSON(secrets) }}
           exclude: GCR_JSON_KEY
