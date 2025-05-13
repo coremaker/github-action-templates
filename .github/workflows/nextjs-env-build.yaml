@@ -58,10 +58,14 @@ on:
       ENVIRONMENT:
         type: string
         required: false
+    secrets:
+      AUTH0_CLIENT_SECRET:
+        required: false
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment: ${{ inputs.ENVIRONMENT }}
     defaults:
       run:
         working-directory: ${{ inputs.WORKING_DIR }}
@@ -74,6 +78,11 @@ jobs:
         uses: oNaiPs/secrets-to-env-action@v1
         with:
           secrets: ${{ toJSON(secrets) }}
+
+      - name: Export env from github
+        uses: oNaiPs/secrets-to-env-action@v1
+        with:
+          secrets: ${{ toJSON(env) }}
 
       - name: Use a repo or org secret from the calling workflow.
         run: echo ${{ secrets.AUTH0_CLIENT_SECRET }}
