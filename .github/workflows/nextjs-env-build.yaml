@@ -58,6 +58,9 @@ on:
       ENVIRONMENT:
         type: string
         required: false
+    secrets:
+      AUTH0_CLIENT_SECRET:
+        required: false
 
 jobs:
   build:
