@@ -55,18 +55,15 @@ on:
       WIP_SERVICE_ACCOUNT:
         type: string
         required: false
-      ENVIRONMENT:
-        type: string
-        required: false
+    secrets:
       GCR_JSON_KEY:
-        required: false
+        required: true
       HIVE_TOKEN:
         required: false
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    environment: ${{ inputs.ENVIRONMENT }}
     defaults:
       run:
         working-directory: ${{ inputs.WORKING_DIR }}
@@ -74,17 +71,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-
-      - name: Export Secrets from github
-        uses: oNaiPs/secrets-to-env-action@v1
-        with:
-          secrets: ${{ toJSON(secrets) }}
-          exclude: GCR_JSON_KEY
-
-      - name: Export ENV vars from github
-        uses: oNaiPs/secrets-to-env-action@v1
-        with:
-          secrets: ${{ toJSON(vars) }}
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
@@ -136,7 +122,7 @@ jobs:
         if: ${{ inputs.SCHEMA_CHECK }}
         run: npm run schema:check
         env:
-          HIVE_TOKEN: ${{ inputs.HIVE_TOKEN }}
+          HIVE_TOKEN: ${{ secrets.HIVE_TOKEN }}
 
       - name: Login to GCR
         if: ${{ inputs.PR_CHECK == false }}
@@ -144,7 +130,7 @@ jobs:
         with:
           registry: ${{ inputs.GCR_REGISTRY }}
           username: _json_key
-          password: ${{ inputs.GCR_JSON_KEY }}
+          password: ${{ secrets.GCR_JSON_KEY }}
 
       - name: Build Docker Image
         uses: docker/build-push-action@v3

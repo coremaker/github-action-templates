@@ -1,0 +1,83 @@
+name: Nodejs
+
+on:
+  workflow_call:
+    inputs:
+      WORKING_DIR:
+        required: false
+        type: string
+        default: "."
+      SERVICE_NAME:
+        required: true
+        type: string
+      RUN_TESTS:
+        required: false
+        type: boolean
+        default: false
+      NODE_VERSION:
+        required: false
+        type: number
+        default: 16
+      GCR_REGISTRY:
+        required: false
+        type: string
+        default: "gcr.io"
+      GCR_REGISTRY_PROJECT:
+        required: true
+        type: string
+      TRIVY_SCAN_ENABLED:
+        required: false
+        type: boolean
+        default: true
+      TRIVY_TIMEOUT:
+        required: false
+        type: string
+        default: "10m0s"
+      PR_CHECK:
+        required: false 
+        type: boolean
+        default: false
+      SCHEMA_CHECK:
+        required: false 
+        type: boolean
+        default: false
+      ENABLE_PROTOC:
+        required: false 
+        type: boolean
+        default: false
+      GCP_AUTH:
+        required: false 
+        type: boolean
+        default: false
+      WORKLOAD_IDENTITY_PROVIDER:
+        type: string
+        required: false
+      WIP_SERVICE_ACCOUNT:
+        type: string
+        required: false
+      ENVIRONMENT:
+        type: string
+        required: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.ENVIRONMENT }}
+    defaults:
+      run:
+        working-directory: ${{ inputs.WORKING_DIR }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Export Secrets from github
+        uses: oNaiPs/secrets-to-env-action@v1
+        with:
+          secrets: ${{ toJSON(secrets) }}
+          exclude: GCR_JSON_KEY
+
+      - name: Export ENV vars from github
+        uses: oNaiPs/secrets-to-env-action@v1
+        with:
+          secrets: ${{ toJSON(vars) }}
