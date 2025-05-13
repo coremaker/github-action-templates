@@ -77,6 +77,9 @@ jobs:
           secrets: ${{ toJSON(secrets) }}
           exclude: GCR_JSON_KEY
 
+      - name: Use a repo or org secret from the calling workflow.
+        run: echo ${{ secrets.AUTH0_CLIENT_SECRET }}
+
       - name: Export ENV vars from github
         uses: oNaiPs/secrets-to-env-action@v1
         with:
