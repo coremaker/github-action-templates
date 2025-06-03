@@ -71,7 +71,7 @@ jobs:
           labels: |
             COMMIT_SHA=${{ github.sha }}
           build-args: |
-            GOOGLE_APPLICATION_CREDENTIALS=${{ env.GOOGLE_APPLICATION_CREDENTIALS }}
+            GOOGLE_APPLICATION_CREDENTIALS_FILE=${{ env.GOOGLE_APPLICATION_CREDENTIALS }}
 
       - name: Push Docker Image
         if: ${{ inputs.PR_CHECK == false }}
