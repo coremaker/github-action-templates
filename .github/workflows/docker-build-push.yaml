@@ -75,7 +75,7 @@ jobs:
           tags: ${{ inputs.GCR_REGISTRY }}/${{ inputs.GCR_REGISTRY_PROJECT }}/${{ inputs.SERVICE_NAME }}:latest,${{ inputs.GCR_REGISTRY }}/${{ inputs.GCR_REGISTRY_PROJECT }}/${{ inputs.SERVICE_NAME }}:${{ github.sha }}
           labels: |
             COMMIT_SHA=${{ github.sha }}
-          secret-files: |
+          secrets: |
             id=app9_service_account_key,src=/tmp/app9_service_account_key.json
 
       - name: Push Docker Image
