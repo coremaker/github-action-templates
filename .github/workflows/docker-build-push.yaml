@@ -34,7 +34,7 @@ on:
     secrets:
       GCR_JSON_KEY:
         required: true
-      APP9_LIBRARIES_KEY :
+      APP9_LIBRARIES_KEY:
         required: true
 
 jobs:
