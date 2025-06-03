@@ -64,10 +64,10 @@ jobs:
           username: _json_key
           password: ${{ secrets.GCR_JSON_KEY }}
 
-      - name: Write GCP service account key to file
-        run: |
-          echo "${{ secrets.APP9_LIBRARIES_KEY }}" > /tmp/app9_service_account_key.json
-          cat /tmp/app9_service_account_key.json | head -n 5
+      # - name: Write GCP service account key to file
+      #   run: |
+      #     echo "${{ secrets.APP9_LIBRARIES_KEY }}" > /tmp/app9_service_account_key.json
+      #     cat /tmp/app9_service_account_key.json | head -n 5
 
       - name: Build Docker Image
         uses: docker/build-push-action@v5
@@ -78,7 +78,7 @@ jobs:
           labels: |
             COMMIT_SHA=${{ github.sha }}
           secrets: |
-            id=app9_service_account_key,src=/tmp/app9_service_account_key.json
+            app9_service_account_key=${{ secrets.APP9_LIBRARIES_KEY }}
 
       - name: Push Docker Image
         if: ${{ inputs.PR_CHECK == false }}
