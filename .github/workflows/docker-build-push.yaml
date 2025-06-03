@@ -73,7 +73,7 @@ jobs:
           labels: |
             COMMIT_SHA=${{ github.sha }}
           secrets: |
-            "app9_service_account_key=${{ secrets.APP9_LIBRARIES_KEY }}"
+            app9_service_account_key=${{ secrets.APP9_LIBRARIES_KEY }}
 
       - name: Push Docker Image
         if: ${{ inputs.PR_CHECK == false }}
