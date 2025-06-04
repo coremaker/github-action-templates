@@ -70,7 +70,7 @@ jobs:
       #     cat /tmp/app9_service_account_key.json | head -n 3
 
       - name: Build Docker Image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: ${{ inputs.WORKING_DIR }}
           push: false
@@ -78,7 +78,7 @@ jobs:
           labels: |
             COMMIT_SHA=${{ github.sha }}
           secrets: |
-            app9_service_account_key=${{ secrets.APP9_LIBRARIES_KEY }}
+            APP9_SERVICE_ACCOUNT_KEY=${{ secrets.APP9_LIBRARIES_KEY }}
 
       - name: Push Docker Image
         if: ${{ inputs.PR_CHECK == false }}
