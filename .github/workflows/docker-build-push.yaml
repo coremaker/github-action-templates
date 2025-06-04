@@ -66,7 +66,7 @@ jobs:
 
       - name: Write GCP service account key to file
         run: |
-          echo "${{ secrets.APP9_LIBRARIES_KEY }}" > /tmp/app9_service_account_key.json
+          echo ${{ secrets.APP9_LIBRARIES_KEY }} > /tmp/app9_service_account_key.json
           cat /tmp/app9_service_account_key.json | head -n 3
 
       - name: Build Docker Image
