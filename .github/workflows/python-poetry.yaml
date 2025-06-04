@@ -24,6 +24,8 @@ on:
     secrets:
       GCR_JSON_KEY:
         required: true
+      APP9_LIBRARIES_KEY:
+        required: true
 
 jobs:
   build-push-docker:
@@ -42,13 +44,15 @@ jobs:
           password: ${{ secrets.GCR_JSON_KEY }}
 
       - name: Build Docker Image
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v6
         with:
           context: ${{ inputs.WORKING_DIR }}
           push: false
           tags: ${{ inputs.GCR_REGISTRY }}/${{ inputs.GCR_REGISTRY_PROJECT }}/${{ inputs.SERVICE_NAME }}:latest,${{ inputs.GCR_REGISTRY }}/${{ inputs.GCR_REGISTRY_PROJECT }}/${{ inputs.SERVICE_NAME }}:${{ github.sha }}
           labels: |
             COMMIT_SHA=${{ github.sha }}
+          secrets: |
+            APP9_SERVICE_ACCOUNT_KEY=${{ secrets.APP9_LIBRARIES_KEY }}
 
       - name: Push Docker Image
         if: ${{ inputs.PR_CHECK == false }}
