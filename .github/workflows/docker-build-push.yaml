@@ -42,7 +42,7 @@ jobs:
           password: ${{ secrets.GCR_JSON_KEY }}
 
       - name: Build Docker Image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v3
         with:
           context: ${{ inputs.WORKING_DIR }}
           push: false
