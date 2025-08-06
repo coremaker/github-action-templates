@@ -106,7 +106,7 @@ jobs:
           push: false
           tags: ${{ inputs.GCR_REGISTRY }}/${{ inputs.GCR_REGISTRY_PROJECT }}/${{ inputs.SERVICE_NAME }}:${{ inputs.ENVIRONMENT }}-${{ github.sha }}
           labels: |
-            COMMIT_SHA=${{ github.sha }}
+            COMMIT_SHA=${{ inputs.ENVIRONMENT }}-${{ github.sha }}
 
       - name: Trivy vulnerability scanner
         if: ${{ inputs.TRIVY_SCAN_ENABLED }}
@@ -128,4 +128,4 @@ jobs:
           push: true
           tags: ${{ inputs.GCR_REGISTRY }}/${{ inputs.GCR_REGISTRY_PROJECT }}/${{ inputs.SERVICE_NAME }}:${{ inputs.ENVIRONMENT }}-${{ github.sha }}
           labels: |
-            COMMIT_SHA=${{ github.sha }}
+            COMMIT_SHA=${{ inputs.ENVIRONMENT }}-${{ github.sha }}
