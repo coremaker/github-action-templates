@@ -51,6 +51,14 @@ on:
       WIP_SERVICE_ACCOUNT:
         type: string
         required: true
+      PERMIFY_ENABLED:
+        required: false 
+        type: boolean
+        default: false
+      PERMIFY_VERSION:
+        required: false
+        type: string
+        default: "1.4.2"
     secrets:
       GCR_JSON_KEY:
         required: true
@@ -85,6 +93,13 @@ jobs:
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2
       
+      - name: Install Permify CLI
+        if: ${{ inputs.PERMIFY_ENABLED }}
+        run: |
+          curl -L https://github.com/Permify/permify/releases/download/v${{ inputs.PERMIFY_VERSION }}/permify_${{ inputs.PERMIFY_VERSION }}_linux_amd64.tar.gz \
+            | tar -xz
+          sudo mv permify /usr/local/bin/permify
+
       - name: Execute Build and Tests
         if: ${{ inputs.RUN_TESTS }}
         run: ./gradlew clean build
