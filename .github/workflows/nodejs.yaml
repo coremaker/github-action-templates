@@ -143,7 +143,7 @@ jobs:
 
       - name: Trivy vulnerability scanner
         if: ${{ inputs.TRIVY_SCAN_ENABLED }}
-        uses: aquasecurity/trivy-action@0.9.1
+        uses: aquasecurity/trivy-action@0.34.0
         with:
           image-ref: ${{ inputs.GCR_REGISTRY }}/${{ inputs.GCR_REGISTRY_PROJECT }}/${{ inputs.SERVICE_NAME }}:${{ github.sha }}
           format: "table"
