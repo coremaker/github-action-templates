@@ -108,7 +108,7 @@ jobs:
         if: ${{ inputs.TRIVY_SCAN_ENABLED }}
         uses: aquasecurity/trivy-action@0.34.0
         with:
-          image-ref: ${{ inputs.GCR_REGISTRY }}/${{ inputs.GCR_REGISTRY_PROJECT }}/${{ inputs.SERVICE_NAME }}:${{ inputs.ENVIRONMENT }}-${{ github.sha }}
+          image-ref: ${{ inputs.GCR_REGISTRY }}/${{ inputs.GCR_REGISTRY_PROJECT }}/${{ inputs.SERVICE_NAME }}:${{ github.sha }}
           format: "table"
           exit-code: 1
           security-checks: "vuln"
@@ -122,6 +122,9 @@ jobs:
         with:
           context: ${{ inputs.WORKING_DIR }}
           push: true
-          tags: ${{ inputs.GCR_REGISTRY }}/${{ inputs.GCR_REGISTRY_PROJECT }}/${{ inputs.SERVICE_NAME }}:${{ inputs.ENVIRONMENT }}-${{ github.sha }}
+          tags: ${{ inputs.GCR_REGISTRY }}/${{ inputs.GCR_REGISTRY_PROJECT }}/${{ inputs.SERVICE_NAME }}:latest,${{ inputs.GCR_REGISTRY }}/${{ inputs.GCR_REGISTRY_PROJECT }}/${{ inputs.SERVICE_NAME }}:${{ github.sha }}
           labels: |
-            COMMIT_SHA=${{ inputs.ENVIRONMENT }}-${{ github.sha }}
+            COMMIT_SHA=${{ github.sha }}
+
+      - name: Done
+        run: echo build succesfully!
