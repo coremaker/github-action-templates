@@ -1,0 +1,130 @@
+name: Nodejs
+
+on:
+  workflow_call:
+    inputs:
+      WORKING_DIR:
+        required: false
+        type: string
+        default: "."
+      SERVICE_NAME:
+        required: true
+        type: string
+      RUN_TESTS:
+        required: false
+        type: boolean
+        default: false
+      NODE_VERSION:
+        required: false
+        type: number
+        default: 22
+      GCR_REGISTRY:
+        required: false
+        type: string
+        default: "gcr.io"
+      GCR_REGISTRY_PROJECT:
+        required: true
+        type: string
+      TRIVY_SCAN_ENABLED:
+        required: false
+        type: boolean
+        default: true
+      TRIVY_TIMEOUT:
+        required: false
+        type: string
+        default: "10m0s"
+      PR_CHECK:
+        required: false 
+        type: boolean
+        default: false
+      ENVIRONMENT:
+        type: string
+        required: false
+    secrets:
+      GCR_JSON_KEY:
+        required: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.ENVIRONMENT }}
+    defaults:
+      run:
+        working-directory: ${{ inputs.WORKING_DIR }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Export Secrets from github
+        uses: oNaiPs/secrets-to-env-action@v1
+        with:
+          secrets: ${{ toJSON(secrets) }}
+          exclude: GCR_JSON_KEY
+
+      - name: Export ENV vars from github
+        uses: oNaiPs/secrets-to-env-action@v1
+        with:
+          secrets: ${{ toJSON(vars) }}
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ inputs.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Running Tests
+        if: ${{ inputs.RUN_TESTS }}
+        run: pnpm test
+
+      - name: Build App
+        id: build
+        run: pnpm build
+
+      - name: Login to GCR
+        if: ${{ inputs.PR_CHECK == false }}
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ inputs.GCR_REGISTRY }}
+          username: _json_key
+          password: ${{ secrets.GCR_JSON_KEY }}
+
+      - name: Build Docker Image
+        uses: docker/build-push-action@v3
+        with:
+          context: ${{ inputs.WORKING_DIR }}
+          push: false
+          tags: ${{ inputs.GCR_REGISTRY }}/${{ inputs.GCR_REGISTRY_PROJECT }}/${{ inputs.SERVICE_NAME }}:latest,${{ inputs.GCR_REGISTRY }}/${{ inputs.GCR_REGISTRY_PROJECT }}/${{ inputs.SERVICE_NAME }}:${{ github.sha }}
+          labels: |
+            COMMIT_SHA=${{ github.sha }}
+
+      - name: Trivy vulnerability scanner
+        if: ${{ inputs.TRIVY_SCAN_ENABLED }}
+        uses: aquasecurity/trivy-action@0.34.0
+        with:
+          image-ref: ${{ inputs.GCR_REGISTRY }}/${{ inputs.GCR_REGISTRY_PROJECT }}/${{ inputs.SERVICE_NAME }}:${{ github.sha }}
+          format: "table"
+          exit-code: 1
+          security-checks: "vuln"
+          vuln-type: "library"
+          severity: "CRITICAL"
+          timeout: ${{ inputs.TRIVY_TIMEOUT }}
+
+      - name: Push Docker Image
+        if: ${{ inputs.PR_CHECK == false }}
+        uses: docker/build-push-action@v3
+        with:
+          context: ${{ inputs.WORKING_DIR }}
+          push: true
+          tags: ${{ inputs.GCR_REGISTRY }}/${{ inputs.GCR_REGISTRY_PROJECT }}/${{ inputs.SERVICE_NAME }}:latest,${{ inputs.GCR_REGISTRY }}/${{ inputs.GCR_REGISTRY_PROJECT }}/${{ inputs.SERVICE_NAME }}:${{ github.sha }}
+          labels: |
+            COMMIT_SHA=${{ github.sha }}
+
+      - name: Done
+        run: echo build succesfully!
