@@ -21,9 +21,13 @@ on:
         required: false 
         type: boolean
         default: false
-    secrets:
-      GCR_JSON_KEY:
+      GCR_WORKLOAD_IDENTITY_PROVIDER:
+        type: string
         required: true
+      GCR_SERVICE_ACCOUNT:
+        type: string
+        required: true
+    secrets:
       APP9_LIBRARIES_KEY:
         required: true
 
