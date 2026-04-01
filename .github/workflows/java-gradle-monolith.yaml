@@ -138,13 +138,15 @@ jobs:
             --timeout "${{ inputs.TRIVY_TIMEOUT }}" \
             "${{ inputs.GCR_REGISTRY }}/${{ inputs.GCR_REGISTRY_PROJECT }}/${{ inputs.SERVICE_NAME }}:${{ github.sha }}"
 
-      - name: Authenticate to Google Cloud (WIF)
+      - name: Authenticate with Google Cloud Registry
         if: ${{ inputs.PR_CHECK }}
         id: auth-gcr
         uses: google-github-actions/auth@v3
         with:
           workload_identity_provider: ${{ inputs.GCR_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ inputs.GCR_SERVICE_ACCOUNT }}
+          token_format: 'access_token'
+          access_token_lifetime: '900s'
 
       - name: Login to Artifact Registry
         if: ${{ inputs.PR_CHECK }}
