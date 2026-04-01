@@ -29,6 +29,10 @@ on:
         required: false
         type: boolean
         default: true
+      TRIVY_VERSION:
+        required: false         
+        type: string
+        default: "57a97c7"
       TRIVY_TIMEOUT:
         required: false
         type: string
@@ -106,7 +110,7 @@ jobs:
 
       - name: Trivy vulnerability scanner
         if: ${{ inputs.TRIVY_SCAN_ENABLED }}
-        uses: aquasecurity/trivy-action@v0.35.0
+        uses: aquasecurity/trivy-action@${{ inputs.TRIVY_VERSION }}
         with:
           image-ref: ${{ inputs.GCR_REGISTRY }}/${{ inputs.GCR_REGISTRY_PROJECT }}/${{ inputs.SERVICE_NAME }}:${{ github.sha }}
           format: "table"
