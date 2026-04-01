@@ -139,7 +139,7 @@ jobs:
             "${{ inputs.GCR_REGISTRY }}/${{ inputs.GCR_REGISTRY_PROJECT }}/${{ inputs.SERVICE_NAME }}:${{ github.sha }}"
 
       - name: Authenticate to Google Cloud (WIF)
-        if: ${{ !inputs.PR_CHECK }}
+        if: ${{ inputs.PR_CHECK }}
         id: auth-gcr
         uses: google-github-actions/auth@v3
         with:
@@ -147,7 +147,7 @@ jobs:
           service_account: ${{ inputs.GCR_SERVICE_ACCOUNT }}
 
       - name: Login to Artifact Registry
-        if: ${{ !inputs.PR_CHECK }}
+        if: ${{ inputs.PR_CHECK }}
         uses: docker/login-action@v4
         with:
           registry: ${{ inputs.GCR_REGISTRY }}
