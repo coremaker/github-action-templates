@@ -125,10 +125,16 @@ jobs:
           labels: |
             COMMIT_SHA=${{ github.sha }}
             
+        # v0.2.6
+      - name: Setup Trivy
+        uses: aquasecurity/setup-trivy@3fb12ec12f41e471780db15c232d5dd185dcb514
+
+        # v0.35.0
       - name: Trivy vulnerability scanner
         if: ${{ inputs.TRIVY_SCAN_ENABLED }}
         uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1
         with:
+          skip-setup-trivy: true
           image-ref: ${{ inputs.GCR_REGISTRY }}/${{ inputs.GCR_REGISTRY_PROJECT }}/${{ inputs.SERVICE_NAME }}:${{ github.sha }}
           format: "table"
           exit-code: 1
